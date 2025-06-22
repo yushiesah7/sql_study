@@ -1,0 +1,1 @@
+# PostgreSQL接続管理（asyncpg or SQLModel）
