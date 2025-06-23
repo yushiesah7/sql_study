@@ -14,7 +14,7 @@ DANGEROUS_PATTERNS = [
 
 # 許可するSQL文のパターン  
 ALLOWED_PATTERNS = [
-    r'^\s*SELECT\s+',
+    r'^\s*SELECT(\s+|$)',  # SELECT文（後に何かがあるか、文末）
     r'^\s*WITH\s+.+\s+SELECT\s+',
     r'^\s*\(\s*SELECT\s+',  # サブクエリ
 ]
@@ -37,10 +37,13 @@ def validate_sql(sql: str) -> Tuple[bool, Optional[str], Optional[str]]:
     
     # 危険なパターンチェック
     for pattern in DANGEROUS_PATTERNS:
-        if re.search(pattern, sql_upper):
-            match = re.search(pattern, sql_upper)
-            statement = match.group(1) if match else "不明"
-            return False, VALIDATION_INVALID_SQL, f"{statement}文は実行できません"
+        match = re.search(pattern, sql_upper)
+        if match:
+            if match.groups():
+                statement = match.group(1)
+                return False, VALIDATION_INVALID_SQL, f"{statement}文は実行できません"
+            else:
+                return False, VALIDATION_INVALID_SQL, "複数のステートメントは実行できません"
     
     # 許可パターンチェック
     valid = any(re.match(pattern, sql_upper) for pattern in ALLOWED_PATTERNS)

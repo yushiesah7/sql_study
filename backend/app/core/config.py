@@ -3,7 +3,7 @@
 """
 from typing import List, Optional
 from pydantic_settings import BaseSettings
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 
 class Settings(BaseSettings):
@@ -34,15 +34,17 @@ class Settings(BaseSettings):
     SQL_EXECUTION_TIMEOUT: float = Field(default=5.0)
     MAX_RESULT_ROWS: int = Field(default=100)
     
-    @validator("ALLOWED_ORIGINS", pre=True)
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    @classmethod
     def parse_cors(cls, v):
         if isinstance(v, str):
             return [i.strip() for i in v.split(",")]
         return v
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = {
+        "env_file": ".env",
+        "case_sensitive": True
+    }
 
 
 # グローバル設定インスタンス

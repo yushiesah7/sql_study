@@ -60,8 +60,8 @@ class ErrorResponse(BaseModel):
     """エラーレスポンス"""
     error: Dict[str, Any] = Field(..., description="エラー情報")
     
-    class Config:
-        schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "error": {
                     "code": "VALIDATION_INVALID_SQL",
@@ -71,3 +71,4 @@ class ErrorResponse(BaseModel):
                 }
             }
         }
+    }
