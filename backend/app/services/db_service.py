@@ -18,14 +18,17 @@ class DatabaseService:
     """データベース操作サービスクラス"""
     
     def __init__(self, db: Database):
+        """
+        Initialize the DatabaseService with a Database instance.
+        """
         self.db = db
     
     async def initialize_system_schema(self):
         """
-        システム用スキーマとテーブルを初期化
+        Initialize the system schema and create the problems table if they do not exist.
         
         Raises:
-            DatabaseError: 初期化失敗時
+            DatabaseError: If schema or table initialization fails.
         """
         try:
             # app_systemスキーマ作成
@@ -59,10 +62,10 @@ class DatabaseService:
     
     async def drop_all_user_tables(self):
         """
-        publicスキーマのユーザーテーブルを全削除
+        Drops all user-created tables in the public schema.
         
         Raises:
-            DatabaseError: 削除失敗時
+            DatabaseError: If table deletion fails.
         """
         try:
             # publicスキーマのテーブル一覧を取得
@@ -92,13 +95,13 @@ class DatabaseService:
     
     async def execute_sql_statements(self, sql_statements: List[str]):
         """
-        SQL文を順次実行
+        Executes a list of SQL statements sequentially.
         
-        Args:
-            sql_statements: 実行するSQL文のリスト
-            
+        Parameters:
+            sql_statements (List[str]): List of SQL statements to execute.
+        
         Raises:
-            DatabaseError: 実行失敗時
+            DatabaseError: If execution of any SQL statement fails.
         """
         try:
             for sql in sql_statements:
@@ -117,13 +120,13 @@ class DatabaseService:
     
     async def get_table_schemas(self) -> List[Dict[str, Any]]:
         """
-        publicスキーマのテーブル構造を取得
+        Retrieve the schema details of all base tables in the public schema.
         
         Returns:
-            テーブル構造のリスト
-            
+            List[Dict[str, Any]]: A list of dictionaries, each containing the table name and a list of column definitions with type, nullability, primary key, and foreign key information.
+        
         Raises:
-            DatabaseError: 取得失敗時
+            DatabaseError: If retrieval of table schemas fails.
         """
         try:
             # テーブル一覧を取得
@@ -221,17 +224,17 @@ class DatabaseService:
     
     async def execute_select_query(self, sql: str, timeout: int = 5) -> List[Dict[str, Any]]:
         """
-        SELECT文を実行して結果を取得
+        Executes a SELECT SQL query with a specified timeout and returns the results as a list of dictionaries.
         
-        Args:
-            sql: 実行するSELECT文
-            timeout: タイムアウト秒数
-            
+        Parameters:
+            sql (str): The SELECT SQL query to execute.
+            timeout (int, optional): The maximum number of seconds to wait for the query to complete. Defaults to 5.
+        
         Returns:
-            クエリ結果
-            
+            List[Dict[str, Any]]: The query results, where each row is represented as a dictionary.
+        
         Raises:
-            DatabaseError: 実行失敗時
+            DatabaseError: If the query execution fails.
         """
         try:
             # タイムアウト付きで実行
@@ -258,21 +261,21 @@ class DatabaseService:
         hint: Optional[str] = None
     ) -> int:
         """
-        問題をデータベースに保存
+        Save a new problem record to the database and return its unique ID.
         
-        Args:
-            theme: テーマ
-            difficulty: 難易度
-            correct_sql: 正解SQL
-            expected_result: 期待結果
-            table_schemas: テーブル構造
-            hint: ヒント
-            
+        Parameters:
+            theme (str): The theme or category of the problem.
+            difficulty (str): The difficulty level of the problem.
+            correct_sql (str): The correct SQL statement for the problem.
+            expected_result (List[Dict[str, Any]]): The expected result set for the problem.
+            table_schemas (List[Dict[str, Any]]): The table schemas relevant to the problem.
+            hint (Optional[str]): An optional hint for solving the problem.
+        
         Returns:
-            問題ID
-            
+            int: The ID of the newly saved problem.
+        
         Raises:
-            DatabaseError: 保存失敗時
+            DatabaseError: If saving the problem fails.
         """
         try:
             result = await self.db.fetch_one("""
@@ -296,16 +299,16 @@ class DatabaseService:
     
     async def get_problem(self, problem_id: int) -> Optional[Dict[str, Any]]:
         """
-        問題を取得
+        Retrieve a problem record by its ID from the system problems table.
         
-        Args:
-            problem_id: 問題ID
-            
+        Parameters:
+            problem_id (int): The unique identifier of the problem to retrieve.
+        
         Returns:
-            問題情報（存在しない場合はNone）
-            
+            dict: A dictionary containing the problem's details if found, or None if no such problem exists.
+        
         Raises:
-            DatabaseError: 取得失敗時
+            DatabaseError: If retrieval from the database fails.
         """
         try:
             result = await self.db.fetch_one("""

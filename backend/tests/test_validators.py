@@ -14,7 +14,11 @@ class TestValidateSQL:
     """SQL検証のテストクラス"""
     
     def test_valid_select_statements(self):
-        """有効なSELECT文のテスト"""
+        """
+        Tests that various valid SELECT SQL statements are accepted by the validator.
+        
+        Verifies that simple and complex SELECT queries, including those with whitespace padding, are recognized as valid with no error code or message.
+        """
         valid_sqls = [
             "SELECT * FROM employees",
             "SELECT name, age FROM users WHERE age > 25",
@@ -30,7 +34,9 @@ class TestValidateSQL:
             assert error_message is None
     
     def test_valid_with_statements(self):
-        """有効なWITH文のテスト"""
+        """
+        Tests that valid SQL statements using WITH and WITH RECURSIVE clauses are accepted by the validator without errors.
+        """
         valid_sqls = [
             "WITH ranked AS (SELECT *, ROW_NUMBER() OVER(ORDER BY salary) FROM employees) SELECT * FROM ranked",
             "WITH RECURSIVE factorial AS (SELECT 1 as n, 1 as result) SELECT * FROM factorial",
@@ -43,7 +49,9 @@ class TestValidateSQL:
             assert error_message is None
     
     def test_valid_subqueries(self):
-        """有効なサブクエリのテスト"""
+        """
+        Tests that valid SQL subqueries, including those using UNION, are accepted as valid by the SQL validator.
+        """
         valid_sqls = [
             "(SELECT * FROM employees WHERE age > 30)",
             "(SELECT name FROM users) UNION (SELECT name FROM admins)",
@@ -56,7 +64,11 @@ class TestValidateSQL:
             assert error_message is None
     
     def test_empty_sql(self):
-        """空のSQLのテスト"""
+        """
+        Tests that empty or whitespace-only SQL inputs, including None, are rejected as invalid.
+        
+        Verifies that the validator returns False, the VALIDATION_EMPTY_SQL error code, and an error message indicating no input was provided.
+        """
         empty_sqls = ["", "   ", "\t\n", None]
         
         for sql in empty_sqls:
@@ -66,7 +78,11 @@ class TestValidateSQL:
             assert "入力されていません" in error_message
     
     def test_sql_too_long(self):
-        """SQLが長すぎる場合のテスト"""
+        """
+        Tests that excessively long SQL statements are rejected as invalid.
+        
+        Verifies that when a SQL statement exceeds the allowed length, `validate_sql` returns `False`, the `VALIDATION_SQL_TOO_LONG` error code, and an appropriate error message.
+        """
         long_sql = "SELECT * FROM employees WHERE " + "age > 25 AND " * 1000 + "name IS NOT NULL"
         
         is_valid, error_code, error_message = validate_sql(long_sql)
@@ -75,7 +91,11 @@ class TestValidateSQL:
         assert "長すぎます" in error_message
     
     def test_dangerous_statements(self):
-        """危険なSQL文のテスト"""
+        """
+        Test that dangerous SQL statements such as DROP, CREATE, ALTER, TRUNCATE, DELETE, UPDATE, INSERT, GRANT, REVOKE, and EXECUTE are correctly identified as invalid by the SQL validator.
+        
+        Ensures that each dangerous command is rejected with the appropriate error code and message.
+        """
         dangerous_sqls = [
             "DROP TABLE employees",
             "CREATE TABLE test (id INT)",
@@ -97,7 +117,11 @@ class TestValidateSQL:
             assert "実行できません" in error_message
     
     def test_multiple_statements(self):
-        """複数ステートメントのテスト"""
+        """
+        Tests that SQL inputs containing multiple statements separated by semicolons are rejected as invalid.
+        
+        Ensures that the validator returns `False` with the `VALIDATION_INVALID_SQL` error code for each multi-statement input.
+        """
         multiple_sqls = [
             "SELECT * FROM users; DROP TABLE users;",
             "SELECT name FROM employees; DELETE FROM logs;",
@@ -110,7 +134,11 @@ class TestValidateSQL:
             assert error_code == VALIDATION_INVALID_SQL
     
     def test_case_insensitive_detection(self):
-        """大文字小文字を問わない検出のテスト"""
+        """
+        Test that dangerous SQL commands are detected regardless of letter casing.
+        
+        Verifies that variations in capitalization of forbidden commands like "DROP TABLE" are correctly identified as invalid SQL statements.
+        """
         case_variations = [
             "drop table users",
             "Drop Table users",
@@ -124,7 +152,9 @@ class TestValidateSQL:
             assert error_code == VALIDATION_INVALID_SQL
     
     def test_non_select_statements(self):
-        """SELECT以外の文のテスト"""
+        """
+        Tests that non-SELECT SQL statements are rejected by the validator with the appropriate error code and message.
+        """
         non_select_sqls = [
             "SHOW TABLES",
             "DESCRIBE employees",
@@ -139,7 +169,9 @@ class TestValidateSQL:
             assert "SELECT文のみ実行可能です" in error_message
     
     def test_sql_injection_attempts(self):
-        """SQLインジェクション試行のテスト"""
+        """
+        Tests that SQL injection attempts combining valid and dangerous commands are rejected, while complex but safe SQL statements such as subqueries and UNIONs are accepted.
+        """
         dangerous_attempts = [
             "SELECT * FROM users WHERE id = 1; DROP TABLE users; --",
             "SELECT * FROM products WHERE price < 100; DELETE FROM orders; /*",
@@ -161,7 +193,9 @@ class TestValidateSQL:
             assert is_valid is True, f"Complex but safe SQL should be allowed: {sql}"
     
     def test_edge_cases(self):
-        """エッジケースのテスト"""
+        """
+        Tests that the SQL validator correctly handles edge cases such as minimal SELECT statements, queries with literals, newlines, and comments, ensuring they are accepted as valid.
+        """
         edge_cases = [
             ("SELECT", True),  # 最小のSELECT文
             ("SELECT 1", True),  # シンプルなSELECT

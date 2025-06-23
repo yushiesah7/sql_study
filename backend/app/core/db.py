@@ -17,10 +17,18 @@ class Database:
     """データベース接続管理クラス"""
     
     def __init__(self):
+        """
+        Initialize the Database instance with an uninitialized connection pool.
+        """
         self.pool: Optional[asyncpg.Pool] = None
     
     async def connect(self) -> None:
-        """データベース接続プールを作成"""
+        """
+        Establishes a connection pool to the PostgreSQL database using configuration settings.
+        
+        Raises:
+            DatabaseError: If the connection pool cannot be created.
+        """
         try:
             self.pool = await asyncpg.create_pool(
                 settings.DATABASE_URL,
@@ -40,14 +48,24 @@ class Database:
             )
     
     async def disconnect(self) -> None:
-        """データベース接続プールを閉じる"""
+        """
+        Close the database connection pool if it exists.
+        """
         if self.pool:
             await self.pool.close()
             logger.info("Database connection pool closed")
     
     @asynccontextmanager
     async def acquire(self):
-        """接続をコンテキストマネージャーとして取得"""
+        """
+        Asynchronously acquires a database connection from the pool as an async context manager.
+        
+        Yields:
+            An active database connection for use within an async context.
+        
+        Raises:
+            DatabaseError: If the connection pool has not been initialized.
+        """
         if not self.pool:
             raise DatabaseError(
                 message="データベースプールが初期化されていません",
@@ -64,7 +82,19 @@ class Database:
         *args,
         timeout: Optional[float] = None
     ) -> List[Dict[str, Any]]:
-        """SELECT文を実行"""
+        """
+        Executes a SQL SELECT query asynchronously and returns the results as a list of dictionaries.
+        
+        Parameters:
+            query (str): The SQL SELECT statement to execute.
+            timeout (Optional[float]): Maximum time in seconds to wait for the query to complete.
+        
+        Returns:
+            List[Dict[str, Any]]: Query results, where each row is represented as a dictionary.
+        
+        Raises:
+            DatabaseError: If a timeout occurs, the SQL syntax is invalid, or another execution error happens.
+        """
         try:
             async with self.acquire() as conn:
                 # タイムアウト設定
@@ -100,7 +130,19 @@ class Database:
             )
     
     async def execute(self, query: str, *args) -> Any:
-        """任意のSQLを実行（CREATE/DROP等）"""
+        """
+        Executes an arbitrary SQL command such as CREATE or DROP.
+        
+        Parameters:
+        	query (str): The SQL command to execute.
+        	*args: Parameters to pass to the SQL command.
+        
+        Returns:
+        	The result of the SQL execution, typically a status string.
+        
+        Raises:
+        	DatabaseError: If execution fails for any reason.
+        """
         try:
             async with self.acquire() as conn:
                 result = await conn.execute(query, *args)
@@ -114,7 +156,12 @@ class Database:
             )
     
     async def get_table_schemas(self) -> List[Dict[str, Any]]:
-        """現在のテーブルスキーマ情報を取得"""
+        """
+        Retrieve schema information for all base tables in the public schema.
+        
+        Returns:
+            List of dictionaries, each containing table name, type, comment, and a list of column metadata (name, data type, nullability, default value, and maximum length) for each table.
+        """
         query = """
         SELECT 
             t.table_name,
@@ -153,7 +200,11 @@ class Database:
         return tables
     
     async def drop_all_tables(self) -> None:
-        """全てのテーブルを削除（開発用）"""
+        """
+        Drop all tables in the public schema, temporarily disabling foreign key constraints.
+        
+        Intended for development use only. Foreign key checks are disabled during the operation to allow cascading drops, then restored afterward. Raises a DatabaseError if the operation fails.
+        """
         try:
             async with self.acquire() as conn:
                 # 外部キー制約を一時的に無効化
@@ -181,7 +232,12 @@ class Database:
             )
     
     async def check_health(self) -> bool:
-        """データベース接続の健全性をチェック"""
+        """
+        Check if the database connection is healthy by executing a simple query.
+        
+        Returns:
+            bool: True if the database is reachable and responsive, otherwise False.
+        """
         try:
             async with self.acquire() as conn:
                 await conn.fetchval("SELECT 1")

@@ -24,14 +24,14 @@ router = APIRouter()
 
 def _compare_results(user_result: List[Dict[str, Any]], expected_result: List[Dict[str, Any]]) -> bool:
     """
-    クエリ結果を比較（カラム順序無視）
+    Compare two SQL query results for exact match, ignoring column and row order.
     
-    Args:
-        user_result: ユーザーの実行結果
-        expected_result: 期待される結果
-        
+    Parameters:
+        user_result (List[Dict[str, Any]]): The result set produced by the user's SQL query.
+        expected_result (List[Dict[str, Any]]): The expected result set for the problem.
+    
     Returns:
-        完全一致するかどうか
+        bool: True if the results match exactly in content, regardless of column or row order; otherwise, False.
     """
     if len(user_result) != len(expected_result):
         return False
@@ -51,6 +51,15 @@ def _compare_results(user_result: List[Dict[str, Any]], expected_result: List[Di
     
     # 行の比較（順序を考慮してソート）
     def normalize_row(row):
+        """
+        Return a tuple of a row's items sorted by key.
+        
+        Parameters:
+            row (dict): A dictionary representing a single row from a SQL query result.
+        
+        Returns:
+            tuple: A tuple of key-value pairs sorted by key, enabling order-insensitive comparison of rows.
+        """
         return tuple(sorted(row.items()))
     
     user_normalized = sorted([normalize_row(row) for row in user_result])
@@ -66,20 +75,12 @@ async def check_answer(
     db_service: DatabaseService = Depends(get_db_service)
 ):
     """
-    ユーザーのSQL回答をチェック
+    Evaluates a user's SQL answer for a given problem, compares the result to the expected output, and returns automated feedback and scoring.
     
-    Args:
-        request: リクエストデータ
-            - prompt: 省略可、フィードバック指示
-            - context: 必須
-                - problem_id: 問題ID
-                - user_sql: ユーザーのSQL
-                
+    Validates the request and SQL syntax, retrieves problem details, executes the user's SQL query, and compares the results. If the answer is incorrect, provides detailed feedback, hints, and suggestions for improvement. Handles various error scenarios and returns appropriate HTTP responses.
+    
     Returns:
-        採点結果とフィードバック
-        
-    Raises:
-        HTTPException: チェック失敗時
+        UniversalResponse: Contains correctness, feedback message, score, and, if incorrect, detailed comparison and suggestions.
     """
     try:
         # リクエスト検証

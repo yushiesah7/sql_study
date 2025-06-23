@@ -24,7 +24,11 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """アプリケーションライフサイクル管理"""
+    """
+    Asynchronous context manager for managing application startup and shutdown events.
+    
+    On startup, logs the application start and connects to the database. On shutdown, disconnects from the database and logs the shutdown event.
+    """
     # 起動時処理
     logger.info(f"Starting {settings.APP_NAME} v{__version__}")
     
@@ -62,7 +66,12 @@ app.add_middleware(
 # グローバルエラーハンドラー
 @app.exception_handler(AppException)
 async def app_exception_handler(request: Request, exc: AppException):
-    """アプリケーション例外ハンドラー"""
+    """
+    Handle custom application exceptions and return a structured JSON error response.
+    
+    Returns:
+        JSONResponse: A response containing the error code, message, details, and any additional data, with the appropriate HTTP status code.
+    """
     logger.error(f"AppException: {exc.error_code} - {exc.message}", exc_info=True)
     return JSONResponse(
         status_code=exc.status_code,
@@ -77,7 +86,12 @@ async def app_exception_handler(request: Request, exc: AppException):
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
-    """汎用例外ハンドラー"""
+    """
+    Handles uncaught exceptions by logging the error and returning a generic internal server error response.
+    
+    Returns:
+        JSONResponse: A 500 response with an error code and message. Includes exception details if debug mode is enabled.
+    """
     logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
     return JSONResponse(
         status_code=500,
@@ -92,7 +106,12 @@ async def general_exception_handler(request: Request, exc: Exception):
 # ヘルスチェックエンドポイント
 @app.get("/api/health", response_model=HealthResponse)
 async def health_check():
-    """ヘルスチェック"""
+    """
+    Performs a health check of the application, verifying the status of the database and LLM service.
+    
+    Returns:
+        HealthResponse: An object containing the overall health status, current timestamp, application version, and individual service health states.
+    """
     from app.core.db import db
     from app.core.dependencies import get_llm
     

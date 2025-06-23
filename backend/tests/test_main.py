@@ -12,13 +12,17 @@ class TestHealthEndpoint:
     """ヘルスチェックエンドポイントのテスト"""
     
     def setup_method(self):
-        """テストメソッドごとの初期化"""
+        """
+        Initializes a new TestClient instance for each test method.
+        """
         self.client = TestClient(app)
     
     @patch('app.core.db.db.check_health', new_callable=AsyncMock)
     @patch('app.core.dependencies.get_llm', new_callable=AsyncMock)
     def test_health_check_success(self, mock_get_llm, mock_check_health):
-        """ヘルスチェック成功のテスト"""
+        """
+        Test that the health check endpoint returns a healthy status and correct response structure when all services are healthy.
+        """
         # モック設定
         mock_check_health.return_value = True
         mock_llm_service = AsyncMock()
@@ -40,7 +44,9 @@ class TestHealthEndpoint:
     @patch('app.core.db.db.check_health', new_callable=AsyncMock)
     @patch('app.core.dependencies.get_llm', new_callable=AsyncMock)
     def test_health_check_database_failure(self, mock_get_llm, mock_check_health):
-        """データベース障害時のヘルスチェック"""
+        """
+        Test that the health check endpoint reports an unhealthy status when the database health check fails but the LLM service is healthy.
+        """
         # モック設定
         mock_check_health.return_value = False
         mock_llm_service = AsyncMock()
@@ -57,7 +63,11 @@ class TestHealthEndpoint:
         assert data["services"]["llm"] is True
     
     def test_health_check_response_format(self):
-        """ヘルスチェックレスポンス形式のテスト"""
+        """
+        Test that the health check endpoint returns a response with the correct structure and data types.
+        
+        Verifies the presence of required fields (`status`, `timestamp`, `version`, `services`) in the response, ensures that `services` contains both `database` and `llm`, and checks that all fields have the expected types.
+        """
         with patch('app.core.db.db.check_health', new_callable=AsyncMock) as mock_check_health, \
              patch('app.core.dependencies.get_llm', new_callable=AsyncMock) as mock_get_llm:
             mock_check_health.return_value = True
@@ -93,17 +103,23 @@ class TestErrorHandling:
     """エラーハンドリングのテスト"""
     
     def setup_method(self):
-        """テストメソッドごとの初期化"""
+        """
+        Initializes a new TestClient instance for each test method.
+        """
         self.client = TestClient(app)
     
     def test_404_not_found(self):
-        """存在しないエンドポイントのテスト"""
+        """
+        Test that a GET request to a nonexistent endpoint returns a 404 Not Found response.
+        """
         response = self.client.get("/api/nonexistent")
         
         assert response.status_code == 404
     
     def test_method_not_allowed(self):
-        """許可されていないHTTPメソッドのテスト"""
+        """
+        Test that sending a DELETE request to the /api/health endpoint returns HTTP 405 Method Not Allowed.
+        """
         response = self.client.delete("/api/health")
         
         assert response.status_code == 405
@@ -113,11 +129,17 @@ class TestCORS:
     """CORS設定のテスト"""
     
     def setup_method(self):
-        """テストメソッドごとの初期化"""
+        """
+        Initializes a new TestClient instance for each test method.
+        """
         self.client = TestClient(app)
     
     def test_cors_preflight(self):
-        """プリフライトリクエストのテスト"""
+        """
+        Test that a CORS preflight (OPTIONS) request to the health endpoint returns a valid status code.
+        
+        Sends an OPTIONS request with appropriate CORS headers and asserts that the response status code is either 200 or 204, indicating correct CORS configuration.
+        """
         headers = {
             "Origin": "http://localhost:3000",
             "Access-Control-Request-Method": "POST",
@@ -130,7 +152,9 @@ class TestCORS:
         assert response.status_code in [200, 204]
     
     def test_cors_actual_request(self):
-        """実際のCORSリクエストのテスト"""
+        """
+        Tests that an actual CORS GET request to the health endpoint returns a successful response and includes the appropriate CORS headers.
+        """
         headers = {
             "Origin": "http://localhost:3000",
             "Content-Type": "application/json",
@@ -154,18 +178,24 @@ class TestApplicationLifecycle:
     """アプリケーションライフサイクルのテスト"""
     
     def test_app_creation(self):
-        """アプリケーションインスタンス作成のテスト"""
+        """
+        Test that the FastAPI application instance is created and has the correct title.
+        """
         assert app is not None
         assert app.title == "SQL Learning App"
     
     def test_middleware_setup(self):
-        """ミドルウェア設定のテスト"""
+        """
+        Test that the CORS middleware is correctly included in the application's middleware stack.
+        """
         # CORSミドルウェアが正しく設定されているかテスト
         middlewares = [middleware.cls.__name__ for middleware in app.user_middleware]
         assert "CORSMiddleware" in middlewares
     
     def test_exception_handlers_registered(self):
-        """例外ハンドラー登録のテスト"""
+        """
+        Test that custom exception handlers for AppException and the base Exception are registered in the FastAPI application.
+        """
         # 例外ハンドラーが登録されているかテスト
         exception_handlers = app.exception_handlers
         
@@ -179,11 +209,17 @@ class TestOpenAPISchema:
     """OpenAPIスキーマのテスト"""
     
     def setup_method(self):
-        """テストメソッドごとの初期化"""
+        """
+        Initializes a new TestClient instance for each test method.
+        """
         self.client = TestClient(app)
     
     def test_openapi_schema_accessible(self):
-        """OpenAPIスキーマアクセス可能性のテスト"""
+        """
+        Test that the OpenAPI schema is accessible and contains the expected metadata.
+        
+        Asserts that the `/openapi.json` endpoint returns a 200 status code, includes the required OpenAPI fields, and that the API title matches "SQL Learning App".
+        """
         response = self.client.get("/openapi.json")
         
         assert response.status_code == 200
@@ -194,14 +230,18 @@ class TestOpenAPISchema:
         assert schema["info"]["title"] == "SQL Learning App"
     
     def test_docs_accessible(self):
-        """APIドキュメントアクセス可能性のテスト"""
+        """
+        Test that the Swagger UI documentation endpoint (/docs) is accessible and returns HTML content.
+        """
         response = self.client.get("/docs")
         
         assert response.status_code == 200
         assert "text/html" in response.headers["content-type"]
     
     def test_redoc_accessible(self):
-        """ReDocアクセス可能性のテスト"""
+        """
+        Test that the ReDoc documentation endpoint is accessible and returns HTML content.
+        """
         response = self.client.get("/redoc")
         
         assert response.status_code == 200

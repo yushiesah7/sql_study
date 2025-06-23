@@ -16,7 +16,16 @@ class ErrorResponseBuilder:
         data: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
-        統一されたエラーレスポンスを構築
+        Constructs a standardized error response dictionary containing an error code, message, and timestamp.
+        
+        Parameters:
+            error_code (str): The identifier for the error type.
+            message (str): A descriptive message explaining the error.
+            detail (Optional[str]): Additional details about the error, if available.
+            data (Optional[Dict[str, Any]]): Supplementary data relevant to the error, if provided.
+        
+        Returns:
+            Dict[str, Any]: A dictionary representing the error response, including code, message, timestamp, and optionally detail and data.
         """
         response = {
             "error": {

@@ -27,16 +27,15 @@ async def generate_problem(
     db_service: DatabaseService = Depends(get_db_service)
 ):
     """
-    SQL学習問題を生成
+    Generate an SQL learning problem based on the current database schema and an optional prompt.
     
-    Args:
-        request: リクエストデータ（prompt: 省略可、最大1000文字）
-        
+    This endpoint creates a new SQL problem by leveraging a large language model (LLM) and the current database table structure. It validates the prompt, ensures tables exist, generates a problem and SQL query, executes the query to obtain expected results, and saves the problem details. Returns the problem ID, query result, and relevant metadata.
+    
+    Parameters:
+        request (UniversalRequest): Contains an optional prompt string (up to 1000 characters) to guide problem generation.
+    
     Returns:
-        問題ID、実行結果、メタデータ
-        
-    Raises:
-        HTTPException: 生成失敗時
+        UniversalResponse: Contains success status, problem ID, SQL query result, row count, column names, and difficulty level.
     """
     try:
         # プロンプトの取得（最大1000文字）

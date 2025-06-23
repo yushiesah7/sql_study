@@ -12,13 +12,12 @@ class PromptGenerator:
     @staticmethod
     def create_table_generation_prompt(user_prompt: Optional[str] = None) -> List[Dict[str, str]]:
         """
-        テーブル作成用プロンプトを生成
+        Generate a prompt for creating SQL tables and sample data for learning purposes.
         
-        Args:
-            user_prompt: ユーザーからの指示（オプション）
-            
+        If a user instruction is provided, it is included in the prompt; otherwise, a default request for a random theme is used. The prompt instructs the LLM to design 2-4 related tables with realistic sample data, appropriate relationships, and Japanese data, formatted for PostgreSQL.
+        
         Returns:
-            LLMに送信するメッセージリスト
+            A list of message dictionaries for LLM input, including system and user roles.
         """
         system_message = """あなたはSQL学習アプリのためのテーブル設計アシスタントです。
         
@@ -66,14 +65,14 @@ class PromptGenerator:
         user_prompt: Optional[str] = None
     ) -> List[Dict[str, str]]:
         """
-        問題生成用プロンプトを生成
+        Generate a prompt for creating SQL practice problems based on provided table schemas.
         
-        Args:
-            table_schemas: テーブルスキーマ情報
-            user_prompt: ユーザーからの指示（オプション）
-            
+        Parameters:
+            table_schemas (List[Dict[str, Any]]): List of dictionaries describing the structure of each table, including columns and data types.
+            user_prompt (Optional[str]): Additional instructions or requirements for the problem, if provided.
+        
         Returns:
-            LLMに送信するメッセージリスト
+            List[Dict[str, str]]: A list of message dictionaries formatted for LLM input, containing system and user roles with instructions for generating a SQL problem.
         """
         # テーブル情報を整理
         schema_info = PromptGenerator._format_table_schemas(table_schemas)
@@ -129,16 +128,16 @@ class PromptGenerator:
         table_schemas: List[Dict[str, Any]]
     ) -> List[Dict[str, str]]:
         """
-        回答チェック用プロンプトを生成
+        Generate a prompt for evaluating a user's SQL answer, including their SQL, execution result, expected result, and table schemas.
         
-        Args:
-            user_sql: ユーザーが入力したSQL
-            user_result: ユーザーSQLの実行結果
-            expected_result: 期待される実行結果
-            table_schemas: テーブルスキーマ情報
-            
+        Parameters:
+            user_sql (str): The SQL query submitted by the user.
+            user_result (List[Dict[str, Any]]): The result produced by executing the user's SQL.
+            expected_result (List[Dict[str, Any]]): The correct result expected from the SQL query.
+            table_schemas (List[Dict[str, Any]]): Schema information for the relevant tables.
+        
         Returns:
-            LLMに送信するメッセージリスト
+            List[Dict[str, str]]: A list of messages formatted for LLM input, containing system instructions and user data for answer checking and feedback generation.
         """
         schema_info = PromptGenerator._format_table_schemas(table_schemas)
         
@@ -197,13 +196,13 @@ class PromptGenerator:
     @staticmethod
     def _format_table_schemas(table_schemas: List[Dict[str, Any]]) -> str:
         """
-        テーブルスキーマ情報を読みやすい形式にフォーマット
+        Format a list of table schema dictionaries into a human-readable string.
         
-        Args:
-            table_schemas: テーブルスキーマ情報
-            
+        Parameters:
+            table_schemas (List[Dict[str, Any]]): List of dictionaries containing table schema information.
+        
         Returns:
-            フォーマット済みのスキーマ情報
+            str: A formatted string describing each table's name and columns, including data types and nullability. Returns a placeholder if no schemas are provided.
         """
         if not table_schemas:
             return "（テーブル情報なし）"

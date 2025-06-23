@@ -10,7 +10,9 @@ class TestSettings:
     """設定クラスのテスト"""
     
     def test_default_settings(self):
-        """デフォルト設定のテスト"""
+        """
+        Test that the Settings class initializes with the correct default values for all configuration parameters.
+        """
         settings = Settings()
         
         # アプリケーション設定
@@ -40,7 +42,9 @@ class TestSettings:
         assert settings.MAX_RESULT_ROWS == 100
     
     def test_cors_string_parsing(self):
-        """CORS設定の文字列解析テスト"""
+        """
+        Tests that the Settings class correctly parses a comma-separated string from the ALLOWED_ORIGINS environment variable into a list of origins.
+        """
         # 環境変数をモック
         os.environ["ALLOWED_ORIGINS"] = "http://test1.com,http://test2.com,http://test3.com"
         
@@ -55,7 +59,9 @@ class TestSettings:
         del os.environ["ALLOWED_ORIGINS"]
     
     def test_cors_list_format(self):
-        """CORS設定のリスト形式テスト"""
+        """
+        Test that ALLOWED_ORIGINS is correctly set when provided as a list to the Settings class.
+        """
         settings = Settings(ALLOWED_ORIGINS=["http://example.com", "http://test.com"])
         
         assert len(settings.ALLOWED_ORIGINS) == 2
@@ -63,7 +69,9 @@ class TestSettings:
         assert "http://test.com" in settings.ALLOWED_ORIGINS
     
     def test_cors_with_spaces(self):
-        """CORS設定のスペース処理テスト"""
+        """
+        Test that the Settings class correctly trims spaces from CORS origins provided via the ALLOWED_ORIGINS environment variable.
+        """
         os.environ["ALLOWED_ORIGINS"] = " http://test1.com , http://test2.com , http://test3.com "
         
         settings = Settings()
@@ -78,7 +86,11 @@ class TestSettings:
         del os.environ["ALLOWED_ORIGINS"]
     
     def test_environment_variable_override(self):
-        """環境変数による設定上書きテスト"""
+        """
+        Test that environment variables correctly override default settings in the Settings class.
+        
+        This test sets environment variables for several configuration options, instantiates the Settings class, and verifies that the overridden values are reflected. Environment variables are cleaned up after the test.
+        """
         # 環境変数を設定
         os.environ["APP_NAME"] = "Test App"
         os.environ["DEBUG"] = "true"
@@ -99,7 +111,9 @@ class TestSettings:
         del os.environ["LLM_TIMEOUT"]
     
     def test_numeric_type_conversion(self):
-        """数値型変換のテスト"""
+        """
+        Test that numeric configuration parameters are correctly assigned and typed in the Settings instance.
+        """
         settings = Settings(
             DB_POOL_SIZE=25,
             DB_MAX_OVERFLOW=50,
@@ -127,7 +141,9 @@ class TestSettings:
         assert settings.MAX_RESULT_ROWS == 200
     
     def test_boolean_conversion(self):
-        """ブール値変換のテスト"""
+        """
+        Test that string representations of boolean values in the DEBUG environment variable are correctly converted to boolean types in the Settings instance.
+        """
         # 文字列からブール値への変換
         os.environ["DEBUG"] = "True"
         settings1 = Settings()
@@ -149,7 +165,11 @@ class TestSettings:
         del os.environ["DEBUG"]
     
     def test_url_format_validation(self):
-        """URL形式のバリデーションテスト"""
+        """
+        Test that the URL settings for the database and LLM API have the expected format.
+        
+        Validates that `DATABASE_URL` uses the PostgreSQL scheme and contains typical URL components, and that `LLM_API_URL` starts with "http://" and includes a port separator.
+        """
         settings = Settings()
         
         # DATABASE_URL

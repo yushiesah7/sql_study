@@ -37,6 +37,17 @@ class Settings(BaseSettings):
     @field_validator("ALLOWED_ORIGINS", mode="before")
     @classmethod
     def parse_cors(cls, v):
+        """
+        Parse the CORS allowed origins value into a list of strings.
+        
+        If the input is a comma-separated string, splits it into a list and trims whitespace from each origin. If already a list, returns it unchanged.
+        
+        Parameters:
+            v: The value to parse, either a string or a list.
+        
+        Returns:
+            A list of allowed origin strings.
+        """
         if isinstance(v, str):
             return [i.strip() for i in v.split(",")]
         return v

@@ -14,6 +14,16 @@ class AppException(Exception):
         detail: Optional[str] = None,
         data: Optional[Dict[str, Any]] = None
     ):
+        """
+        Initialize an AppException with a message, error code, HTTP status code, optional detail, and additional data.
+        
+        Parameters:
+            message (str): The main error message.
+            error_code (str): A string identifier for the error type.
+            status_code (int, optional): HTTP status code associated with the error. Defaults to 500.
+            detail (str, optional): Additional details about the error.
+            data (dict, optional): Extra data relevant to the error.
+        """
         self.message = message
         self.error_code = error_code
         self.status_code = status_code
@@ -25,6 +35,14 @@ class AppException(Exception):
 class ValidationError(AppException):
     """入力検証エラー"""
     def __init__(self, message: str, error_code: str = "VALIDATION_ERROR", detail: Optional[str] = None):
+        """
+        Initialize a ValidationError for input validation failures.
+        
+        Parameters:
+            message (str): Description of the validation error.
+            error_code (str, optional): Application-specific error code. Defaults to "VALIDATION_ERROR".
+            detail (str, optional): Additional details about the validation error.
+        """
         super().__init__(
             message=message,
             error_code=error_code,
@@ -36,6 +54,14 @@ class ValidationError(AppException):
 class NotFoundError(AppException):
     """リソース未検出エラー"""
     def __init__(self, message: str, error_code: str = "NOT_FOUND", detail: Optional[str] = None):
+        """
+        Initialize a NotFoundError for signaling that a requested resource could not be found.
+        
+        Parameters:
+            message (str): Description of the missing resource or context of the error.
+            error_code (str, optional): Custom error code identifier. Defaults to "NOT_FOUND".
+            detail (str, optional): Additional details about the error.
+        """
         super().__init__(
             message=message,
             error_code=error_code,
@@ -47,6 +73,14 @@ class NotFoundError(AppException):
 class DatabaseError(AppException):
     """データベース関連エラー"""
     def __init__(self, message: str, error_code: str = "DATABASE_ERROR", detail: Optional[str] = None):
+        """
+        Initialize a DatabaseError for representing database-related failures.
+        
+        Parameters:
+            message (str): Description of the database error.
+            error_code (str, optional): Application-specific error code. Defaults to "DATABASE_ERROR".
+            detail (str, optional): Additional details about the error.
+        """
         super().__init__(
             message=message,
             error_code=error_code,
@@ -58,6 +92,15 @@ class DatabaseError(AppException):
 class LLMError(AppException):
     """LLM関連エラー"""
     def __init__(self, message: str, error_code: str = "LLM_ERROR", detail: Optional[str] = None, status_code: int = 500):
+        """
+        Initialize an LLMError for errors related to large language model operations.
+        
+        Parameters:
+            message (str): Description of the error.
+            error_code (str, optional): Identifier for the error type. Defaults to "LLM_ERROR".
+            detail (str, optional): Additional details about the error.
+            status_code (int, optional): HTTP status code associated with the error. Defaults to 500.
+        """
         super().__init__(
             message=message,
             error_code=error_code,

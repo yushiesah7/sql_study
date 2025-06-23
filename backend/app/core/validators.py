@@ -21,10 +21,15 @@ ALLOWED_PATTERNS = [
 
 def validate_sql(sql: str) -> Tuple[bool, Optional[str], Optional[str]]:
     """
-    SQLの安全性を検証
+    Validate the safety and correctness of a SQL statement.
+    
+    Checks that the SQL is non-empty, does not exceed 5000 characters, does not contain dangerous or forbidden commands (such as DDL, DML, privilege, or multiple statements), and conforms to allowed SELECT statement patterns.
+    
+    Parameters:
+        sql (str): The SQL statement to validate.
     
     Returns:
-        (is_valid, error_code, error_message)
+        Tuple[bool, Optional[str], Optional[str]]: A tuple containing a boolean indicating validity, an optional error code, and an optional error message.
     """
     if not sql or not sql.strip():
         return False, VALIDATION_EMPTY_SQL, "SQLが入力されていません"

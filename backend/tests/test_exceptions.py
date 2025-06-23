@@ -21,7 +21,9 @@ class TestAppException:
     """AppException基底クラスのテスト"""
     
     def test_app_exception_creation(self):
-        """AppException作成のテスト"""
+        """
+        Tests that an AppException is correctly instantiated with all parameters and that its attributes and string representation match the expected values.
+        """
         exc = AppException(
             message="テストエラー",
             error_code="TEST_ERROR",
@@ -38,7 +40,9 @@ class TestAppException:
         assert str(exc) == "テストエラー"
     
     def test_app_exception_minimal(self):
-        """最小構成のAppExceptionテスト"""
+        """
+        Test that AppException initializes correctly with only required parameters and that optional attributes are None.
+        """
         exc = AppException(
             message="最小エラー",
             error_code="MIN_ERROR",
@@ -56,7 +60,9 @@ class TestValidationError:
     """ValidationErrorのテスト"""
     
     def test_validation_error_with_code(self):
-        """エラーコード指定ありのValidationError"""
+        """
+        Tests that ValidationError correctly sets message, error code, status code, and detail when all are provided.
+        """
         exc = ValidationError(
             message="不正なSQL",
             error_code=VALIDATION_INVALID_SQL,
@@ -69,7 +75,9 @@ class TestValidationError:
         assert exc.detail == "SELECT文のみ許可されています"
     
     def test_validation_error_default_code(self):
-        """デフォルトエラーコードのValidationError"""
+        """
+        Test that ValidationError uses the default error code and status code when only a message is provided.
+        """
         exc = ValidationError(message="一般的な検証エラー")
         
         assert exc.message == "一般的な検証エラー"
@@ -82,7 +90,11 @@ class TestNotFoundError:
     """NotFoundErrorのテスト"""
     
     def test_not_found_error_with_code(self):
-        """エラーコード指定ありのNotFoundError"""
+        """
+        Test that NotFoundError initializes correctly with a specific error code and detail.
+        
+        Verifies that the message, error code, status code, and detail attributes are set as expected when provided.
+        """
         exc = NotFoundError(
             message="問題が見つかりません",
             error_code=NOT_FOUND_PROBLEM,
@@ -95,7 +107,9 @@ class TestNotFoundError:
         assert exc.detail == "problem_id: 123"
     
     def test_not_found_error_default_code(self):
-        """デフォルトエラーコードのNotFoundError"""
+        """
+        Test that NotFoundError uses the default error code and status code when only a message is provided.
+        """
         exc = NotFoundError(message="リソースが見つかりません")
         
         assert exc.message == "リソースが見つかりません"
@@ -107,7 +121,11 @@ class TestDatabaseError:
     """DatabaseErrorのテスト"""
     
     def test_database_error_with_code(self):
-        """エラーコード指定ありのDatabaseError"""
+        """
+        Test that DatabaseError initializes correctly with a specific error code and detail.
+        
+        Asserts that the message, error code, status code, and detail attributes are set as expected.
+        """
         exc = DatabaseError(
             message="データベース接続エラー",
             error_code=DATABASE_CONNECTION,
@@ -120,7 +138,9 @@ class TestDatabaseError:
         assert exc.detail == "Connection refused"
     
     def test_database_error_default_code(self):
-        """デフォルトエラーコードのDatabaseError"""
+        """
+        Test that DatabaseError uses the default error code and status code when only a message is provided.
+        """
         exc = DatabaseError(message="一般的なDBエラー")
         
         assert exc.message == "一般的なDBエラー"
@@ -132,7 +152,9 @@ class TestLLMError:
     """LLMErrorのテスト"""
     
     def test_llm_error_with_code(self):
-        """エラーコード指定ありのLLMError"""
+        """
+        Tests that an LLMError initialized with a specific error code, detail, and status code correctly sets all attributes.
+        """
         exc = LLMError(
             message="LLMタイムアウト",
             error_code=LLM_TIMEOUT,
@@ -146,7 +168,9 @@ class TestLLMError:
         assert exc.detail == "30秒でタイムアウト"
     
     def test_llm_error_default_values(self):
-        """デフォルト値のLLMError"""
+        """
+        Test that LLMError initializes with default error code, status code, and no detail when only a message is provided.
+        """
         exc = LLMError(message="一般的なLLMエラー")
         
         assert exc.message == "一般的なLLMエラー"
@@ -159,7 +183,9 @@ class TestExceptionInheritance:
     """例外の継承関係のテスト"""
     
     def test_inheritance_chain(self):
-        """継承チェーンのテスト"""
+        """
+        Test that ValidationError instances are correctly recognized as instances of their own class, the base AppException, and the built-in Exception.
+        """
         validation_error = ValidationError("テスト")
         
         assert isinstance(validation_error, ValidationError)
@@ -167,7 +193,9 @@ class TestExceptionInheritance:
         assert isinstance(validation_error, Exception)
     
     def test_exception_can_be_raised(self):
-        """例外が正しく発生するかのテスト"""
+        """
+        Test that a ValidationError can be raised and caught, and its attributes are set correctly.
+        """
         with pytest.raises(ValidationError) as exc_info:
             raise ValidationError("テストエラー", VALIDATION_INVALID_SQL)
         

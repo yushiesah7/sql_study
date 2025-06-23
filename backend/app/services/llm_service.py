@@ -18,23 +18,24 @@ class LLMService:
     """LLM統合サービスクラス"""
     
     def __init__(self, llm_client: LocalAIClient):
+        """
+        Initialize the LLMService with a given LLM client and create a prompt generator instance.
+        """
         self.llm_client = llm_client
         self.prompt_generator = PromptGenerator()
     
     async def generate_tables(self, user_prompt: Optional[str] = None) -> Dict[str, Any]:
         """
-        テーブル作成SQL生成
+        Generates SQL table creation statements based on an optional user prompt.
         
-        Args:
-            user_prompt: ユーザーからの指示
-            
+        Parameters:
+            user_prompt (Optional[str]): An optional instruction or theme provided by the user to guide table generation.
+        
         Returns:
-            テーブル作成情報
-            {
-                "theme": str,
-                "description": str,
-                "sql_statements": List[str]
-            }
+            Dict[str, Any]: A dictionary containing the generated theme, description, and a list of SQL statements for table creation.
+        
+        Raises:
+            LLMError: If table generation fails or the response is invalid.
         """
         try:
             # プロンプト生成
@@ -69,20 +70,17 @@ class LLMService:
         user_prompt: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        問題生成
+        Generates a SQL problem based on provided table schemas and an optional user prompt.
         
-        Args:
-            table_schemas: テーブルスキーマ情報
-            user_prompt: ユーザーからの指示
-            
+        Parameters:
+            table_schemas (List[Dict[str, Any]]): List of table schema definitions to base the problem on.
+            user_prompt (Optional[str]): Additional instructions or context from the user.
+        
         Returns:
-            問題情報
-            {
-                "difficulty": str,
-                "correct_sql": str,
-                "expected_result": List[Dict],
-                "hint": Optional[str]
-            }
+            Dict[str, Any]: A dictionary containing the generated problem, including difficulty, correct SQL, expected result, and an optional hint.
+        
+        Raises:
+            LLMError: If problem generation fails or the response is invalid.
         """
         try:
             # プロンプト生成
@@ -121,23 +119,24 @@ class LLMService:
         table_schemas: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
         """
-        回答チェック
+        Checks the correctness of a user's SQL answer against the expected result and table schemas using an LLM.
         
-        Args:
-            user_sql: ユーザーSQL
-            user_result: ユーザーSQLの実行結果
-            expected_result: 期待される結果
-            table_schemas: テーブルスキーマ情報
-            
+        Parameters:
+            user_sql (str): The SQL query submitted by the user.
+            user_result (List[Dict[str, Any]]): The result produced by executing the user's SQL.
+            expected_result (List[Dict[str, Any]]): The expected result for the SQL problem.
+            table_schemas (List[Dict[str, Any]]): Schema definitions for the relevant tables.
+        
         Returns:
-            採点結果
-            {
-                "is_correct": bool,
-                "score": int,
-                "feedback": str,
-                "improvement_suggestions": List[str],
-                "hint": Optional[str]
-            }
+            Dict[str, Any]: A dictionary containing the answer evaluation, including:
+                - is_correct (bool): Whether the user's answer is correct.
+                - score (int): The score assigned to the answer.
+                - feedback (str): Feedback on the answer.
+                - improvement_suggestions (List[str]): Suggestions for improvement.
+                - hint (Optional[str]): An optional hint for the user.
+        
+        Raises:
+            LLMError: If answer checking fails or the response is invalid.
         """
         try:
             # プロンプト生成
@@ -170,16 +169,12 @@ class LLMService:
     
     def _parse_json_response(self, content: str) -> Dict[str, Any]:
         """
-        LLMレスポンスからJSONを解析
+        Parses and returns a JSON object from the LLM response content.
         
-        Args:
-            content: LLMからのレスポンステキスト
-            
-        Returns:
-            解析されたJSON
-            
+        If the content includes a markdown-style JSON code block, extracts and parses the JSON within the block; otherwise, parses the entire content as JSON.
+        
         Raises:
-            LLMError: JSON解析失敗時
+            LLMError: If the content cannot be parsed as valid JSON.
         """
         try:
             # JSONブロックを探して抽出
@@ -208,7 +203,12 @@ class LLMService:
             )
     
     def _validate_table_generation_result(self, result: Dict[str, Any]) -> None:
-        """テーブル生成結果の検証"""
+        """
+        Validate the result of table generation to ensure required fields and correct types are present.
+        
+        Raises:
+            LLMError: If required fields are missing or if 'sql_statements' is not a list.
+        """
         required_fields = ["theme", "sql_statements"]
         for field in required_fields:
             if field not in result:
@@ -226,7 +226,12 @@ class LLMService:
             )
     
     def _validate_problem_generation_result(self, result: Dict[str, Any]) -> None:
-        """問題生成結果の検証"""
+        """
+        Validate the structure of a problem generation result.
+        
+        Raises:
+            LLMError: If required fields are missing or if 'expected_result' is not a list.
+        """
         required_fields = ["difficulty", "correct_sql", "expected_result"]
         for field in required_fields:
             if field not in result:
@@ -244,7 +249,12 @@ class LLMService:
             )
     
     def _validate_answer_check_result(self, result: Dict[str, Any]) -> None:
-        """回答チェック結果の検証"""
+        """
+        Validate the structure and types of the answer check result.
+        
+        Raises:
+            LLMError: If required fields are missing or if 'is_correct' is not a boolean.
+        """
         required_fields = ["is_correct", "feedback"]
         for field in required_fields:
             if field not in result:
@@ -263,9 +273,9 @@ class LLMService:
     
     async def check_health(self) -> bool:
         """
-        LLMサービスの健全性チェック
+        Asynchronously checks whether the LLM client service is operational.
         
         Returns:
-            正常に動作するかどうか
+            bool: True if the LLM client is healthy and responsive; otherwise, False.
         """
         return await self.llm_client.check_health()
