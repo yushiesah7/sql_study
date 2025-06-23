@@ -94,12 +94,18 @@ async def general_exception_handler(request: Request, exc: Exception):
 async def health_check():
     """ヘルスチェック"""
     from app.core.db import db
+    from app.core.dependencies import get_llm
     
     # データベース接続チェック
     db_healthy = await db.check_health()
     
-    # TODO: LLM接続チェックはPhase 3で実装
-    llm_healthy = True
+    # LLM接続チェック
+    try:
+        llm_service = await get_llm()
+        llm_healthy = await llm_service.check_health()
+    except Exception as e:
+        logger.warning(f"LLM health check failed: {e}")
+        llm_healthy = False
     
     return HealthResponse(
         status="healthy" if db_healthy and llm_healthy else "unhealthy",
@@ -113,9 +119,9 @@ async def health_check():
 
 
 # APIルーター登録
-# TODO: 各APIルーターをインポートして登録
-# from app.api import create_tables, generate_problem, check_answer, table_schemas
-# app.include_router(create_tables.router, prefix="/api", tags=["tables"])
-# app.include_router(generate_problem.router, prefix="/api", tags=["problems"]) 
-# app.include_router(check_answer.router, prefix="/api", tags=["answers"])
-# app.include_router(table_schemas.router, prefix="/api", tags=["schemas"])
+from app.api import create_tables, generate_problem, check_answer, table_schemas
+
+app.include_router(create_tables.router, prefix="/api", tags=["tables"])
+app.include_router(generate_problem.router, prefix="/api", tags=["problems"]) 
+app.include_router(check_answer.router, prefix="/api", tags=["answers"])
+app.include_router(table_schemas.router, prefix="/api", tags=["schemas"])

@@ -15,11 +15,15 @@ class TestHealthEndpoint:
         """テストメソッドごとの初期化"""
         self.client = TestClient(app)
     
-    @patch('app.main.db.check_health', new_callable=AsyncMock)
-    def test_health_check_success(self, mock_check_health):
+    @patch('app.core.db.db.check_health', new_callable=AsyncMock)
+    @patch('app.core.dependencies.get_llm', new_callable=AsyncMock)
+    def test_health_check_success(self, mock_get_llm, mock_check_health):
         """ヘルスチェック成功のテスト"""
         # モック設定
         mock_check_health.return_value = True
+        mock_llm_service = AsyncMock()
+        mock_llm_service.check_health.return_value = True
+        mock_get_llm.return_value = mock_llm_service
         
         response = self.client.get("/api/health")
         
@@ -31,13 +35,17 @@ class TestHealthEndpoint:
         assert "version" in data
         assert "services" in data
         assert data["services"]["database"] is True
-        assert data["services"]["llm"] is True  # TODO: Phase 3で実装
+        assert data["services"]["llm"] is True
     
-    @patch('app.main.db.check_health', new_callable=AsyncMock)
-    def test_health_check_database_failure(self, mock_check_health):
+    @patch('app.core.db.db.check_health', new_callable=AsyncMock)
+    @patch('app.core.dependencies.get_llm', new_callable=AsyncMock)
+    def test_health_check_database_failure(self, mock_get_llm, mock_check_health):
         """データベース障害時のヘルスチェック"""
         # モック設定
         mock_check_health.return_value = False
+        mock_llm_service = AsyncMock()
+        mock_llm_service.check_health.return_value = True
+        mock_get_llm.return_value = mock_llm_service
         
         response = self.client.get("/api/health")
         
@@ -46,12 +54,16 @@ class TestHealthEndpoint:
         
         assert data["status"] == "unhealthy"
         assert data["services"]["database"] is False
-        assert data["services"]["llm"] is True  # TODO: Phase 3で実装
+        assert data["services"]["llm"] is True
     
     def test_health_check_response_format(self):
         """ヘルスチェックレスポンス形式のテスト"""
-        with patch('app.main.db.check_health', new_callable=AsyncMock) as mock_check_health:
+        with patch('app.core.db.db.check_health', new_callable=AsyncMock) as mock_check_health, \
+             patch('app.core.dependencies.get_llm', new_callable=AsyncMock) as mock_get_llm:
             mock_check_health.return_value = True
+            mock_llm_service = AsyncMock()
+            mock_llm_service.check_health.return_value = True
+            mock_get_llm.return_value = mock_llm_service
             
             response = self.client.get("/api/health")
             
@@ -124,8 +136,12 @@ class TestCORS:
             "Content-Type": "application/json",
         }
         
-        with patch('app.main.db.check_health', new_callable=AsyncMock) as mock_check_health:
+        with patch('app.core.db.db.check_health', new_callable=AsyncMock) as mock_check_health, \
+             patch('app.core.dependencies.get_llm', new_callable=AsyncMock) as mock_get_llm:
             mock_check_health.return_value = True
+            mock_llm_service = AsyncMock()
+            mock_llm_service.check_health.return_value = True
+            mock_get_llm.return_value = mock_llm_service
             
             response = self.client.get("/api/health", headers=headers)
             

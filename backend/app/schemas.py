@@ -12,6 +12,13 @@ class UniversalRequest(BaseModel):
     context: Optional[Dict[str, Any]] = Field(None, description="追加のコンテキスト情報")
 
 
+class UniversalResponse(BaseModel):
+    """汎用レスポンスモデル"""
+    success: bool = Field(..., description="処理成功フラグ")
+    message: str = Field(..., description="ユーザー向けメッセージ")
+    data: Optional[Dict[str, Any]] = Field(None, description="レスポンスデータ")
+
+
 class CreateTablesResponse(BaseModel):
     """テーブル作成レスポンス"""
     success: bool = Field(..., description="作成成功フラグ")
