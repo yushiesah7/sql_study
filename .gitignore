@@ -47,7 +47,6 @@ pgdata/
 .DS_Store
 
 # Docker
-*.log
 
 # LocalAI models (large files)
 models/*.bin

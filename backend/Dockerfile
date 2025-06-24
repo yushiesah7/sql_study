@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
 # 必要なシステムパッケージをインストール
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
