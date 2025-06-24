@@ -24,14 +24,15 @@ router = APIRouter()
 
 def _compare_results(user_result: List[Dict[str, Any]], expected_result: List[Dict[str, Any]]) -> bool:
     """
-    Compare two SQL query results for exact match, ignoring column and row order.
+    """
+    2つのSQLクエリ結果を比較し、列と行の順序を無視して完全一致を判定する。
     
-    Parameters:
-        user_result (List[Dict[str, Any]]): The result set produced by the user's SQL query.
-        expected_result (List[Dict[str, Any]]): The expected result set for the problem.
+    引数:
+        user_result (List[Dict[str, Any]]): ユーザーのSQLクエリによって生成された結果セット。
+        expected_result (List[Dict[str, Any]]): 問題の期待される結果セット。
     
-    Returns:
-        bool: True if the results match exactly in content, regardless of column or row order; otherwise, False.
+    戻り値:
+        bool: 列や行の順序に関係なく内容が完全一致する場合True、そうでなければFalse。
     """
     if len(user_result) != len(expected_result):
         return False
@@ -50,15 +51,15 @@ def _compare_results(user_result: List[Dict[str, Any]], expected_result: List[Di
         return False
     
     # 行の比較（順序を考慮してソート）
-    def normalize_row(row):
         """
-        Return a tuple of a row's items sorted by key.
+        行の項目をキーでソートしたタプルを返す。
         
-        Parameters:
-            row (dict): A dictionary representing a single row from a SQL query result.
+        引数:
+            row (dict): SQLクエリ結果の単一行を表す辞書。
         
-        Returns:
-            tuple: A tuple of key-value pairs sorted by key, enabling order-insensitive comparison of rows.
+        戻り値:
+            tuple: キーでソートされたキー値ペアのタプル、行の順序非依存な比較を可能にする。
+        """
         """
         return tuple(sorted(row.items()))
     
@@ -75,12 +76,15 @@ async def check_answer(
     db_service: DatabaseService = Depends(get_db_service)
 ):
     """
-    Evaluates a user's SQL answer for a given problem, compares the result to the expected output, and returns automated feedback and scoring.
+    指定された問題に対するユーザーのSQL回答を評価し、結果を期待される出力と比較し、自動フィードバックとスコアリングを返す。
     
-    Validates the request and SQL syntax, retrieves problem details, executes the user's SQL query, and compares the results. If the answer is incorrect, provides detailed feedback, hints, and suggestions for improvement. Handles various error scenarios and returns appropriate HTTP responses.
+    リクエストとSQL構文を検証し、問題の詳細を取得し、ユーザーのSQLクエリを実行し、結果を比較する。
+    回答が不正解の場合、詳細なフィードバック、ヒント、改善提案を提供する。
+    さまざまなエラーシナリオを処理し、適切なHTTPレスポンスを返す。
     
-    Returns:
-        UniversalResponse: Contains correctness, feedback message, score, and, if incorrect, detailed comparison and suggestions.
+    戻り値:
+        UniversalResponse: 正確性、フィードバックメッセージ、スコア、不正解の場合は詳細な比較と提案を含む。
+    """
     """
     try:
         # リクエスト検証

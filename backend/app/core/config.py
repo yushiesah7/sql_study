@@ -38,15 +38,16 @@ class Settings(BaseSettings):
     @classmethod
     def parse_cors(cls, v):
         """
-        Parse the CORS allowed origins value into a list of strings.
+        CORS許可オリジン値を文字列のリストに解析する。
         
-        If the input is a comma-separated string, splits it into a list and trims whitespace from each origin. If already a list, returns it unchanged.
+        入力がカンマ区切りの文字列の場合、リストに分割し、各オリジンから空白を除去する。
+        既にリストの場合、そのまま返す。
         
-        Parameters:
-            v: The value to parse, either a string or a list.
+        引数:
+            v: 解析する値、文字列またはリスト。
         
-        Returns:
-            A list of allowed origin strings.
+        戻り値:
+            許可オリジン文字列のリスト。
         """
         if isinstance(v, str):
             return [i.strip() for i in v.split(",")]
