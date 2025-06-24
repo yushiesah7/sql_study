@@ -22,7 +22,9 @@ export const TableDisplay: React.FC<TableDisplayProps> = ({
     );
   }
 
-  const columns = Object.keys(data[0]);
+  const columns = Array.from(
+    new Set(data.flatMap(row => Object.keys(row)))
+  );
   const displayData = data.slice(0, maxRows);
   const hasMoreRows = data.length > maxRows;
 
