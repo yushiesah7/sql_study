@@ -10,7 +10,9 @@ class PromptGenerator:
     """LLM用プロンプト生成クラス"""
     
     @staticmethod
-    def create_table_generation_prompt(user_prompt: Optional[str] = None) -> List[Dict[str, str]]:
+    def create_table_generation_prompt(
+        user_prompt: Optional[str] = None
+    ) -> List[Dict[str, str]]:
         """
         テーブル作成用プロンプトを生成
         
@@ -219,7 +221,9 @@ class PromptGenerator:
                 data_type = col.get('data_type', 'unknown')
                 is_nullable = col.get('is_nullable', 'YES')
                 nullable_str = "NULL" if is_nullable == 'YES' else "NOT NULL"
-                column_info.append(f"  - {col_name}: {data_type} {nullable_str}")
+                column_info.append(
+                    f"  - {col_name}: {data_type} {nullable_str}"
+                )
             
             table_info = f"テーブル: {table_name}\n" + "\n".join(column_info)
             formatted_schemas.append(table_info)

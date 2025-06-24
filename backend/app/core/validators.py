@@ -38,7 +38,11 @@ def validate_sql(sql: str) -> Tuple[bool, Optional[str], Optional[str]]:
     
     # 長さチェック
     if len(sql) > 5000:
-        return False, VALIDATION_SQL_TOO_LONG, "SQLが長すぎます（最大5000文字）"
+        return (
+            False,
+            VALIDATION_SQL_TOO_LONG,
+            "SQLが長すぎます（最大5000文字）"
+        )
     
     # 危険なパターンチェック
     for pattern in DANGEROUS_PATTERNS:
@@ -46,13 +50,24 @@ def validate_sql(sql: str) -> Tuple[bool, Optional[str], Optional[str]]:
         if match:
             if match.groups():
                 statement = match.group(1)
-                return False, VALIDATION_INVALID_SQL, f"{statement}文は実行できません"
-            else:
-                return False, VALIDATION_INVALID_SQL, "複数のステートメントは実行できません"
+                return (
+                    False,
+                    VALIDATION_INVALID_SQL,
+                    f"{statement}文は実行できません"
+                )
+            return (
+                False,
+                VALIDATION_INVALID_SQL,
+                "複数のステートメントは実行できません"
+            )
     
     # 許可パターンチェック
     valid = any(re.match(pattern, sql_upper) for pattern in ALLOWED_PATTERNS)
     if not valid:
-        return False, VALIDATION_INVALID_SQL, "SELECT文のみ実行可能です"
+        return (
+            False,
+            VALIDATION_INVALID_SQL,
+            "SELECT文のみ実行可能です"
+        )
     
     return True, None, None

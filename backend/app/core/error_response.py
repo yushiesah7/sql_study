@@ -2,7 +2,7 @@
 エラーレスポンスビルダー
 """
 from typing import Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class ErrorResponseBuilder:
@@ -22,7 +22,7 @@ class ErrorResponseBuilder:
             "error": {
                 "code": error_code,
                 "message": message,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         }
         

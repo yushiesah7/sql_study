@@ -24,7 +24,12 @@ class AppException(Exception):
 
 class ValidationError(AppException):
     """入力検証エラー"""
-    def __init__(self, message: str, error_code: str = "VALIDATION_ERROR", detail: Optional[str] = None):
+    def __init__(
+        self,
+        message: str,
+        error_code: str = "VALIDATION_ERROR",
+        detail: Optional[str] = None
+    ):
         super().__init__(
             message=message,
             error_code=error_code,
@@ -35,7 +40,12 @@ class ValidationError(AppException):
 
 class NotFoundError(AppException):
     """リソース未検出エラー"""
-    def __init__(self, message: str, error_code: str = "NOT_FOUND", detail: Optional[str] = None):
+    def __init__(
+        self,
+        message: str,
+        error_code: str = "NOT_FOUND",
+        detail: Optional[str] = None
+    ):
         super().__init__(
             message=message,
             error_code=error_code,
@@ -46,7 +56,12 @@ class NotFoundError(AppException):
 
 class DatabaseError(AppException):
     """データベース関連エラー"""
-    def __init__(self, message: str, error_code: str = "DATABASE_ERROR", detail: Optional[str] = None):
+    def __init__(
+        self,
+        message: str,
+        error_code: str = "DATABASE_ERROR",
+        detail: Optional[str] = None
+    ):
         super().__init__(
             message=message,
             error_code=error_code,
@@ -57,7 +72,13 @@ class DatabaseError(AppException):
 
 class LLMError(AppException):
     """LLM関連エラー"""
-    def __init__(self, message: str, error_code: str = "LLM_ERROR", detail: Optional[str] = None, status_code: int = 500):
+    def __init__(
+        self,
+        message: str,
+        error_code: str = "LLM_ERROR",
+        detail: Optional[str] = None,
+        status_code: int = 500
+    ):
         super().__init__(
             message=message,
             error_code=error_code,

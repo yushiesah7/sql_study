@@ -8,15 +8,21 @@ from datetime import datetime
 
 class UniversalRequest(BaseModel):
     """汎用リクエストモデル"""
-    prompt: Optional[str] = Field(None, description="ユーザーからのプロンプト")
-    context: Optional[Dict[str, Any]] = Field(None, description="追加のコンテキスト情報")
+    prompt: Optional[str] = Field(
+        None, description="ユーザーからのプロンプト"
+    )
+    context: Optional[Dict[str, Any]] = Field(
+        None, description="追加のコンテキスト情報"
+    )
 
 
 class UniversalResponse(BaseModel):
     """汎用レスポンスモデル"""
     success: bool = Field(..., description="処理成功フラグ")
     message: str = Field(..., description="ユーザー向けメッセージ")
-    data: Optional[Dict[str, Any]] = Field(None, description="レスポンスデータ")
+    data: Optional[Dict[str, Any]] = Field(
+        None, description="レスポンスデータ"
+    )
 
 
 class CreateTablesResponse(BaseModel):
@@ -32,7 +38,9 @@ class GenerateProblemResponse(BaseModel):
     """問題生成レスポンス"""
     problem_id: int = Field(..., description="問題ID")
     difficulty: str = Field(..., description="難易度（easy/medium/hard）")
-    expected_result: List[Dict[str, Any]] = Field(..., description="期待される実行結果")
+    expected_result: List[Dict[str, Any]] = Field(
+        ..., description="期待される実行結果"
+    )
     hint: Optional[str] = Field(None, description="ヒント")
     created_at: datetime = Field(..., description="作成日時")
 
@@ -41,9 +49,15 @@ class CheckAnswerResponse(BaseModel):
     """回答チェックレスポンス"""
     is_correct: bool = Field(..., description="正解フラグ")
     message: str = Field(..., description="判定結果メッセージ")
-    user_result: Optional[List[Dict[str, Any]]] = Field(None, description="ユーザーSQLの実行結果")
-    expected_result: Optional[List[Dict[str, Any]]] = Field(None, description="期待される実行結果")
-    error_type: Optional[str] = Field(None, description="エラータイプ（syntax/logic/none）")
+    user_result: Optional[List[Dict[str, Any]]] = Field(
+        None, description="ユーザーSQLの実行結果"
+    )
+    expected_result: Optional[List[Dict[str, Any]]] = Field(
+        None, description="期待される実行結果"
+    )
+    error_type: Optional[str] = Field(
+        None, description="エラータイプ（syntax/logic/none）"
+    )
     error_message: Optional[str] = Field(None, description="エラーメッセージ")
     hint: Optional[str] = Field(None, description="ヒント")
     execution_time: float = Field(..., description="実行時間（秒）")
@@ -51,7 +65,9 @@ class CheckAnswerResponse(BaseModel):
 
 class TableSchemasResponse(BaseModel):
     """テーブルスキーマ情報レスポンス"""
-    tables: List[Dict[str, Any]] = Field(..., description="テーブルスキーマ情報")
+    tables: List[Dict[str, Any]] = Field(
+        ..., description="テーブルスキーマ情報"
+    )
     total_count: int = Field(..., description="テーブル総数")
 
 
@@ -60,7 +76,9 @@ class HealthResponse(BaseModel):
     status: str = Field(..., description="サービスステータス")
     timestamp: datetime = Field(..., description="レスポンス時刻")
     version: str = Field(..., description="APIバージョン")
-    services: Dict[str, bool] = Field(..., description="依存サービスの状態")
+    services: Dict[str, bool] = Field(
+        ..., description="依存サービスの状態"
+    )
 
 
 class ErrorResponse(BaseModel):

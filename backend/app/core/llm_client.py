@@ -194,7 +194,8 @@ class LocalAIClient:
                 )
                 return response.status_code == 200
                 
-        except Exception:
+        except Exception as e:
+            logger.error(f"LLM health check failed: {e}")
             return False
 
 
