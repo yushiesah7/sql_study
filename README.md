@@ -52,9 +52,9 @@ docker-compose up -d
 初回起動時はLocalAIのモデルダウンロードに5-10分かかります。
 
 ### 5. アクセス
-- フロントエンド: http://localhost:3000
-- バックエンドAPI: http://localhost:8000/docs
-- LocalAI: http://localhost:8080
+- フロントエンド: [http://localhost:3000](http://localhost:3000)
+- バックエンドAPI: [http://localhost:8000/docs](http://localhost:8000/docs)
+- LocalAI: [http://localhost:8080](http://localhost:8080)
 
 ## 使い方
 

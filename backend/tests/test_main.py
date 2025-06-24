@@ -1,11 +1,9 @@
 """
 FastAPIアプリケーションのテスト
 """
-import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import AsyncMock, patch
 from app.main import app
-from app.core.exceptions import DatabaseError
 
 
 class TestHealthEndpoint:

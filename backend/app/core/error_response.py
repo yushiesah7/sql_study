@@ -22,7 +22,7 @@ class ErrorResponseBuilder:
             "error": {
                 "code": error_code,
                 "message": message,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.utcnow().isoformat()
             }
         }
         

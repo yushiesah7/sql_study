@@ -1,7 +1,6 @@
 """
 設定管理のテスト
 """
-import pytest
 import os
 from app.core.config import Settings
 

@@ -1,7 +1,6 @@
 """
 SQL検証機能のテスト
 """
-import pytest
 from app.core.validators import validate_sql
 from app.core.error_codes import (
     VALIDATION_EMPTY_SQL,

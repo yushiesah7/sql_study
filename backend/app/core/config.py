@@ -1,7 +1,7 @@
 """
 アプリケーション設定
 """
-from typing import List, Optional
+from typing import List
 from pydantic_settings import BaseSettings
 from pydantic import Field, field_validator
 
@@ -14,7 +14,9 @@ class Settings(BaseSettings):
     DEBUG: bool = Field(default=False)
     
     # Database
-    DATABASE_URL: str = Field(default="postgresql://postgres:changethis@db:5432/mydb")
+    DATABASE_URL: str = Field(
+        default="postgresql://postgres:changethis@db:5432/mydb"
+    )
     DB_POOL_SIZE: int = Field(default=10)
     DB_MAX_OVERFLOW: int = Field(default=20)
     DB_POOL_TIMEOUT: float = Field(default=30.0)
@@ -28,7 +30,9 @@ class Settings(BaseSettings):
     LLM_MAX_TOKENS: int = Field(default=2000)
     
     # CORS
-    ALLOWED_ORIGINS: List[str] = Field(default=["http://localhost:3000", "http://frontend:3000"])
+    ALLOWED_ORIGINS: List[str] = Field(
+        default=["http://localhost:3000", "http://frontend:3000"]
+    )
     
     # Security
     SQL_EXECUTION_TIMEOUT: float = Field(default=5.0)
