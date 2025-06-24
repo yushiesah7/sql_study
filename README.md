@@ -29,7 +29,7 @@ AIを活用した新しいタイプのSQL学習アプリケーションです。
 
 ### 1. リポジトリのクローン
 ```bash
-git clone https://github.com/yushiesah7/sql_study.git
+git clone <your-repository-url>
 cd sql_study
 ```
 
