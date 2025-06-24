@@ -18,16 +18,16 @@ class Database:
     
     def __init__(self):
         """
-        Initialize the Database instance with an uninitialized connection pool.
+        未初期化の接続プールでDatabaseインスタンスを初期化する。
         """
         self.pool: Optional[asyncpg.Pool] = None
     
     async def connect(self) -> None:
         """
-        Establishes a connection pool to the PostgreSQL database using configuration settings.
+        設定を使用してPostgreSQLデータベースへの接続プールを確立する。
         
-        Raises:
-            DatabaseError: If the connection pool cannot be created.
+        例外:
+            DatabaseError: 接続プールが作成できない場合。
         """
         try:
             self.pool = await asyncpg.create_pool(
@@ -49,7 +49,7 @@ class Database:
     
     async def disconnect(self) -> None:
         """
-        Close the database connection pool if it exists.
+        データベース接続プールが存在する場合、それを閉じる。
         """
         if self.pool:
             await self.pool.close()
@@ -58,13 +58,13 @@ class Database:
     @asynccontextmanager
     async def acquire(self):
         """
-        Asynchronously acquires a database connection from the pool as an async context manager.
+        非同期コンテキストマネージャとしてプールからデータベース接続を非同期で取得する。
         
-        Yields:
-            An active database connection for use within an async context.
+        戻り値:
+            非同期コンテキスト内で使用するアクティブなデータベース接続。
         
-        Raises:
-            DatabaseError: If the connection pool has not been initialized.
+        例外:
+            DatabaseError: 接続プールが初期化されていない場合。
         """
         if not self.pool:
             raise DatabaseError(
@@ -83,17 +83,17 @@ class Database:
         timeout: Optional[float] = None
     ) -> List[Dict[str, Any]]:
         """
-        Executes a SQL SELECT query asynchronously and returns the results as a list of dictionaries.
+        SQL SELECTクエリを非同期で実行し、結果を辞書のリストとして返す。
         
-        Parameters:
-            query (str): The SQL SELECT statement to execute.
-            timeout (Optional[float]): Maximum time in seconds to wait for the query to complete.
+        引数:
+            query (str): 実行するSQL SELECT文。
+            timeout (Optional[float]): クエリの完了を待機する最大時間（秒）。
         
-        Returns:
-            List[Dict[str, Any]]: Query results, where each row is represented as a dictionary.
+        戻り値:
+            List[Dict[str, Any]]: 各行が辞書として表現されるクエリ結果。
         
-        Raises:
-            DatabaseError: If a timeout occurs, the SQL syntax is invalid, or another execution error happens.
+        例外:
+            DatabaseError: タイムアウトが発生した場合、SQL構文が無効な場合、またはその他の実行エラーが発生した場合。
         """
         try:
             async with self.acquire() as conn:
@@ -131,17 +131,17 @@ class Database:
     
     async def execute(self, query: str, *args) -> Any:
         """
-        Executes an arbitrary SQL command such as CREATE or DROP.
+        CREATEやDROPなどの任意のSQLコマンドを実行する。
         
-        Parameters:
-        	query (str): The SQL command to execute.
-        	*args: Parameters to pass to the SQL command.
+        引数:
+        	query (str): 実行するSQLコマンド。
+        	*args: SQLコマンドに渡すパラメータ。
         
-        Returns:
-        	The result of the SQL execution, typically a status string.
+        戻り値:
+        	SQL実行の結果、通常はステータス文字列。
         
-        Raises:
-        	DatabaseError: If execution fails for any reason.
+        例外:
+        	DatabaseError: 何らかの理由で実行が失敗した場合。
         """
         try:
             async with self.acquire() as conn:
@@ -157,10 +157,10 @@ class Database:
     
     async def get_table_schemas(self) -> List[Dict[str, Any]]:
         """
-        Retrieve schema information for all base tables in the public schema.
+        publicスキーマ内のすべてのベーステーブルのスキーマ情報を取得する。
         
-        Returns:
-            List of dictionaries, each containing table name, type, comment, and a list of column metadata (name, data type, nullability, default value, and maximum length) for each table.
+        戻り値:
+            各テーブルのテーブル名、タイプ、コメント、および列メタデータ（名前、データ型、NULL許可、デフォルト値、最大長）のリストを含む辞書のリスト。
         """
         query = """
         SELECT 
@@ -201,9 +201,9 @@ class Database:
     
     async def drop_all_tables(self) -> None:
         """
-        Drop all tables in the public schema, temporarily disabling foreign key constraints.
+        外部キー制約を一時的に無効にして、publicスキーマ内のすべてのテーブルを削除する。
         
-        Intended for development use only. Foreign key checks are disabled during the operation to allow cascading drops, then restored afterward. Raises a DatabaseError if the operation fails.
+        開発用途のみを意図している。操作中は外部キーチェックが無効にされ、カスケード削除を可能にし、その後復元される。操作が失敗した場合はDatabaseErrorが発生する。
         """
         try:
             async with self.acquire() as conn:
@@ -233,10 +233,10 @@ class Database:
     
     async def check_health(self) -> bool:
         """
-        Check if the database connection is healthy by executing a simple query.
+        簡単なクエリを実行してデータベース接続が正常かどうかを確認する。
         
-        Returns:
-            bool: True if the database is reachable and responsive, otherwise False.
+        戻り値:
+            bool: データベースに到達可能で応答する場合True、そうでなければFalse。
         """
         try:
             async with self.acquire() as conn:

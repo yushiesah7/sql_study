@@ -23,13 +23,13 @@ async def get_table_schemas(
     db_service: DatabaseService = Depends(get_db_service)
 ):
     """
-    Retrieve the current database table schemas and related metadata.
+    現在のデータベーステーブルスキーマと関連メタデータを取得する。
     
-    Returns:
-        UniversalResponse: An object containing the list of table schemas, inferred theme, table count, and table names.
+    戻り値:
+        UniversalResponse: テーブルスキーマのリスト、推定されたテーマ、テーブル数、テーブル名を含むオブジェクト。
     
-    Raises:
-        HTTPException: If no tables exist, a 404 error is returned. If a database error or unexpected error occurs, a 500 error is returned.
+    例外:
+        HTTPException: テーブルが存在しない場合は404、データベースエラーまたは予期しないエラーの場合は500。
     """
     try:
         logger.info("Getting table schemas")

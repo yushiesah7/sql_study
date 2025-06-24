@@ -23,12 +23,15 @@ async def create_tables(
     db_service: DatabaseService = Depends(get_db_service)
 ):
     """
-    Creates learning database tables and sample data based on an optional prompt.
+    オプションのプロンプトに基づいて学習用データベーステーブルとサンプルデータを作成する。
     
-    Validates the prompt length, removes all existing user tables, initializes the system schema, generates new table structures and sample data using an LLM, and executes the resulting SQL statements. Returns a response with the theme and the number of tables created. Raises an HTTP 400 error if the prompt exceeds 1000 characters, and HTTP 500 errors for LLM or database failures.
+    プロンプトの長さを検証し、既存のユーザーテーブルをすべて削除し、システムスキーマを初期化し、
+    LLMを使用して新しいテーブル構造とサンプルデータを生成し、結果のSQL文を実行する。
+    テーマと作成されたテーブル数を含むレスポンスを返す。プロンプトが1000文字を超える場合はHTTP 400エラー、
+    LLMまたはデータベースの障害でHTTP 500エラーを発生させる。
     
-    Returns:
-        UniversalResponse: Contains success status, a descriptive message, the theme, and the count of created tables.
+    戻り値:
+        UniversalResponse: 成功ステータス、説明メッセージ、テーマ、作成されたテーブル数を含む。
     """
     try:
         # プロンプトの取得（最大1000文字）

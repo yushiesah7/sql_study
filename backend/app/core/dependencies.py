@@ -11,20 +11,20 @@ from app.services.db_service import DatabaseService
 
 async def get_db() -> Database:
     """
-    Asynchronously provides the shared database instance for dependency injection.
+    依存性注入用の共有データベースインスタンスを非同期で提供する。
     
-    Returns:
-        Database: The global database instance.
+    戻り値:
+        Database: グローバルデータベースインスタンス。
     """
     return db
 
 
 async def get_llm() -> LLMService:
     """
-    Asynchronously provides an instance of the LLMService initialized with a new LocalAIClient.
+    新しいLocalAIClientで初期化されたLLMServiceインスタンスを非同期で提供する。
     
-    Returns:
-        LLMService: An instance of the language model service.
+    戻り値:
+        LLMService: 言語モデルサービスのインスタンス。
     """
     llm_client = LocalAIClient()
     return LLMService(llm_client)
@@ -32,6 +32,6 @@ async def get_llm() -> LLMService:
 
 async def get_db_service() -> DatabaseService:
     """
-    Asynchronously provides a DatabaseService instance initialized with the global database.
+    グローバルデータベースで初期化されたDatabaseServiceインスタンスを非同期で提供する。
     """
     return DatabaseService(db)
