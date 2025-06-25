@@ -3,6 +3,7 @@
 ユーザーのSQLを実行して正解と比較し、AIフィードバックを提供
 """
 import logging
+import math
 from typing import Dict, Any, List
 from fastapi import APIRouter, Depends, HTTPException
 from app.schemas import UniversalRequest, UniversalResponse
@@ -50,13 +51,39 @@ def _compare_results(user_result: List[Dict[str, Any]], expected_result: List[Di
         return False
     
     # 行の比較（順序を考慮してソート）
+    def normalize_value(value):
+        """値を正規化（浮動小数点数の比較を考慮）"""
+        if isinstance(value, float):
+            return ('float', value)
+        return ('other', value)
+    
     def normalize_row(row):
-        return tuple(sorted(row.items()))
+        return tuple(sorted((k, normalize_value(v)) for k, v in row.items()))
+    
+    def rows_equal(row1, row2):
+        """行同士を比較（浮動小数点数の近似値比較を含む）"""
+        for (k1, (type1, v1)), (k2, (type2, v2)) in zip(row1, row2):
+            if k1 != k2 or type1 != type2:
+                return False
+            if type1 == 'float':
+                if not math.isclose(v1, v2, rel_tol=1e-9, abs_tol=1e-12):
+                    return False
+            elif v1 != v2:
+                return False
+        return True
     
     user_normalized = sorted([normalize_row(row) for row in user_result])
     expected_normalized = sorted([normalize_row(row) for row in expected_result])
     
-    return user_normalized == expected_normalized
+    # 全ての行を比較
+    if len(user_normalized) != len(expected_normalized):
+        return False
+    
+    for user_row, expected_row in zip(user_normalized, expected_normalized):
+        if not rows_equal(user_row, expected_row):
+            return False
+    
+    return True
 
 
 @router.post("/check-answer", response_model=UniversalResponse)

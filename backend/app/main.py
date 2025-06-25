@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.core.config import settings
 from app.core.exceptions import AppException
@@ -109,7 +109,7 @@ async def health_check():
     
     return HealthResponse(
         status="healthy" if db_healthy and llm_healthy else "unhealthy",
-        timestamp=datetime.now(),
+        timestamp=datetime.now(timezone.utc),
         version=__version__,
         services={
             "database": db_healthy,

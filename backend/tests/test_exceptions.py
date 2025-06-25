@@ -12,7 +12,7 @@ from app.core.exceptions import (
 from app.core.error_codes import (
     VALIDATION_INVALID_SQL,
     NOT_FOUND_PROBLEM,
-    DATABASE_CONNECTION,
+    DB_CONNECTION_ERROR,
     LLM_TIMEOUT
 )
 
@@ -110,12 +110,12 @@ class TestDatabaseError:
         """エラーコード指定ありのDatabaseError"""
         exc = DatabaseError(
             message="データベース接続エラー",
-            error_code=DATABASE_CONNECTION,
+            error_code=DB_CONNECTION_ERROR,
             detail="Connection refused"
         )
         
         assert exc.message == "データベース接続エラー"
-        assert exc.error_code == DATABASE_CONNECTION
+        assert exc.error_code == DB_CONNECTION_ERROR
         assert exc.status_code == 500
         assert exc.detail == "Connection refused"
     

@@ -35,7 +35,7 @@ class Database:
             logger.error(f"Failed to create database pool: {e}")
             raise DatabaseError(
                 message="データベース接続エラー",
-                error_code="DATABASE_CONNECTION",
+                error_code="DB_CONNECTION_ERROR",
                 detail=str(e)
             )
     
@@ -51,7 +51,7 @@ class Database:
         if not self.pool:
             raise DatabaseError(
                 message="データベースプールが初期化されていません",
-                error_code="DATABASE_NOT_INITIALIZED",
+                error_code="DB_NOT_INITIALIZED_ERROR",
                 detail="Database.connect()を先に実行してください"
             )
         
@@ -82,20 +82,20 @@ class Database:
         except asyncio.TimeoutError:
             raise DatabaseError(
                 message="SQL実行タイムアウト",
-                error_code="DATABASE_TIMEOUT",
+                error_code="DB_TIMEOUT_ERROR",
                 detail=f"制限時間: {timeout}秒"
             )
         except asyncpg.PostgresSyntaxError as e:
             raise DatabaseError(
                 message="SQL構文エラー",
-                error_code="DATABASE_SYNTAX",
+                error_code="DB_SYNTAX_ERROR",
                 detail=str(e)
             )
         except Exception as e:
             logger.error(f"Database query error: {e}")
             raise DatabaseError(
                 message="SQL実行エラー",
-                error_code="DATABASE_EXECUTION",
+                error_code="DB_EXECUTION_ERROR",
                 detail=str(e)
             )
     
@@ -109,7 +109,7 @@ class Database:
             logger.error(f"Database execute error: {e}")
             raise DatabaseError(
                 message="SQL実行エラー",
-                error_code="DATABASE_EXECUTION",
+                error_code="DB_EXECUTION_ERROR",
                 detail=str(e)
             )
     
@@ -176,7 +176,7 @@ class Database:
             logger.error(f"Failed to drop tables: {e}")
             raise DatabaseError(
                 message="テーブル削除エラー",
-                error_code="DATABASE_DROP_TABLE_ERROR",
+                error_code="DB_DROP_TABLE_ERROR",
                 detail=str(e)
             )
     
