@@ -1,1 +1,27 @@
-# Requirements file - to be filled with actual dependencies
+# FastAPI関連
+fastapi==0.115.13
+uvicorn[standard]==0.34.3
+python-multipart==0.0.12
+
+# データベース関連
+asyncpg==0.30.0
+databases==0.8.0
+
+# 環境変数・設定管理
+pydantic==2.11.7
+pydantic-settings==2.10.1
+
+# HTTPクライアント（LocalAI連携用）
+httpx==0.28.1
+
+# ログ・監視
+python-json-logger==2.0.7
+
+# テスト関連
+pytest==7.4.4
+pytest-asyncio==0.23.3
+
+# 開発ツール
+black==23.12.1
+flake8==7.0.0
+mypy==1.8.0
