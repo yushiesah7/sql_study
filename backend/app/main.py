@@ -1,6 +1,7 @@
 """
 FastAPIアプリケーションのエントリーポイント
 """
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -13,11 +14,12 @@ from app.core.exceptions import AppException
 from app.core.error_response import ErrorResponseBuilder
 from app.schemas import HealthResponse
 from app import __version__
+from app.api import create_tables, generate_problem, check_answer, table_schemas
 
 # ロガー設定
 logging.basicConfig(
     level=logging.INFO if not settings.DEBUG else logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -27,14 +29,15 @@ async def lifespan(app: FastAPI):
     """アプリケーションライフサイクル管理"""
     # 起動時処理
     logger.info(f"Starting {settings.APP_NAME} v{__version__}")
-    
+
     # データベース接続
     from app.core.db import db
+
     await db.connect()
     logger.info("Database connected")
-    
+
     yield
-    
+
     # 終了時処理
     await db.disconnect()
     logger.info("Database disconnected")
@@ -46,7 +49,7 @@ app = FastAPI(
     title=settings.APP_NAME,
     version=__version__,
     debug=settings.DEBUG,
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # CORS設定
@@ -70,8 +73,8 @@ async def app_exception_handler(request: Request, exc: AppException):
             error_code=exc.error_code,
             message=exc.message,
             detail=exc.detail,
-            data=exc.data
-        )
+            data=exc.data,
+        ),
     )
 
 
@@ -84,8 +87,8 @@ async def general_exception_handler(request: Request, exc: Exception):
         content=ErrorResponseBuilder.build(
             error_code="INTERNAL_ERROR",
             message="内部エラーが発生しました",
-            detail=str(exc) if settings.DEBUG else None
-        )
+            detail=str(exc) if settings.DEBUG else None,
+        ),
     )
 
 
@@ -95,10 +98,10 @@ async def health_check():
     """ヘルスチェック"""
     from app.core.db import db
     from app.core.dependencies import get_llm
-    
+
     # データベース接続チェック
     db_healthy = await db.check_health()
-    
+
     # LLM接続チェック
     try:
         llm_service = await get_llm()
@@ -106,7 +109,7 @@ async def health_check():
     except Exception as e:
         logger.warning(f"LLM health check failed: {e}")
         llm_healthy = False
-    
+
     return HealthResponse(
         status="healthy" if db_healthy and llm_healthy else "unhealthy",
         timestamp=datetime.now(timezone.utc),
@@ -114,14 +117,12 @@ async def health_check():
         services={
             "database": db_healthy,
             "llm": llm_healthy,
-        }
+        },
     )
 
 
 # APIルーター登録
-from app.api import create_tables, generate_problem, check_answer, table_schemas
-
 app.include_router(create_tables.router, prefix="/api", tags=["tables"])
-app.include_router(generate_problem.router, prefix="/api", tags=["problems"]) 
+app.include_router(generate_problem.router, prefix="/api", tags=["problems"])
 app.include_router(check_answer.router, prefix="/api", tags=["answers"])
 app.include_router(table_schemas.router, prefix="/api", tags=["schemas"])

@@ -30,21 +30,19 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
   };
 
   return (
-    <div className={clsx(
-      'border rounded-md p-4',
-      variantClasses[variant],
-      className
-    )}>
+    <div
+      className={clsx(
+        'rounded-md border p-4',
+        variantClasses[variant],
+        className,
+      )}
+    >
       <div className="flex">
         <div className="flex-shrink-0">
           <AlertCircle className={clsx('h-5 w-5', iconClasses[variant])} />
         </div>
         <div className="ml-3 flex-1">
-          {title && (
-            <h3 className="text-sm font-medium mb-1">
-              {title}
-            </h3>
-          )}
+          {title && <h3 className="mb-1 text-sm font-medium">{title}</h3>}
           <div className="text-sm">
             <p>{message}</p>
           </div>
@@ -56,9 +54,12 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
                 onClick={onDismiss}
                 className={clsx(
                   'inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2',
-                  variant === 'error' && 'text-red-500 hover:bg-red-100 focus:ring-red-600',
-                  variant === 'warning' && 'text-yellow-500 hover:bg-yellow-100 focus:ring-yellow-600',
-                  variant === 'info' && 'text-blue-500 hover:bg-blue-100 focus:ring-blue-600'
+                  variant === 'error' &&
+                    'text-red-500 hover:bg-red-100 focus:ring-red-600',
+                  variant === 'warning' &&
+                    'text-yellow-500 hover:bg-yellow-100 focus:ring-yellow-600',
+                  variant === 'info' &&
+                    'text-blue-500 hover:bg-blue-100 focus:ring-blue-600',
                 )}
               >
                 <span className="sr-only">閉じる</span>

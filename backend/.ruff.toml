@@ -1,0 +1,14 @@
+# Ruff設定ファイル（プロジェクト固有設定）
+# pyproject.tomlの設定を上書きまたは拡張
+
+[lint]
+# プロジェクト固有の除外ルール
+extend-ignore = [
+    "D100",  # Missing docstring in public module
+    "D104",  # Missing docstring in public package
+]
+
+[format]
+# プロジェクト固有のフォーマット設定
+docstring-code-format = true
+docstring-code-line-length = 72

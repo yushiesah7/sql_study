@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "next": "14.0.0",
@@ -23,7 +27,12 @@
     "lucide-react": "^0.290.0"
   },
   "devDependencies": {
-    "eslint": "^8.51.0",
-    "eslint-config-next": "14.0.0"
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.6.0",
+    "prettier-plugin-tailwindcss": "^0.6.0"
   }
 }
