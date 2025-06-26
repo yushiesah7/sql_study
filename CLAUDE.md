@@ -60,17 +60,91 @@ docs/
 2. **実装前に設計書のレビューを実施**
 3. **依存関係を考慮した実装順序を守る**（docs/task_list.md参照）
 
-## よく使うコマンド（実装後）
-```bash
-# 開発環境起動
-docker-compose up -d
+## バックエンド開発ルール
 
+### アーキテクチャ概要
+- **本番環境**: Dockerfileで`COPY`を使用し、ビルド時にファイルを固定
+- **開発環境**: docker-compose.dev.ymlでボリュームマウントを使用し、ホットリロード対応
+- **フレームワーク**: FastAPI + uvicorn
+- **データベース**: PostgreSQL 15
+- **LLM**: LocalAI
+
+### 開発フロー
+
+#### 1. 開発環境の起動
+```bash
+# 開発用docker-compose（ボリュームマウント・ホットリロード付き）
+docker-compose -f docker-compose.dev.yml up -d
+
+# 本番用docker-compose（イメージビルド方式）
+docker-compose up -d
+```
+
+#### 2. コード修正時の対応
+**開発環境の場合**:
+- ホストでファイルを編集すると、自動的にコンテナに反映される
+- uvicornの`--reload`オプションによりサーバーが自動再起動
+
+**本番環境の場合**:
+- イメージの再ビルドが必要
+```bash
+docker-compose build backend
+docker-compose up -d backend
+```
+
+#### 3. Linting/Formatting
+
+**開発環境（推奨）**:
+```bash
+# ホストでRuffを実行（ファイルが同期されているため）
+cd backend
+ruff check app/
+ruff format app/
+```
+
+**本番環境の場合**:
+```bash
+# コンテナ内で実行
+docker-compose exec backend ruff check /app
+docker-compose exec backend ruff format /app
+
+# 修正後のファイルをホストにコピー（手動）
+docker cp sql_study-backend-1:/app/app ./backend/
+```
+
+#### 4. テスト実行
+```bash
+# 開発環境・本番環境共通
+docker-compose exec backend pytest
+```
+
+### よく使うコマンド
+
+```bash
 # ログ確認
 docker-compose logs -f backend
 
-# テスト実行
-docker-compose exec backend pytest
-
 # データベース接続
 docker-compose exec db psql -U postgres -d mydb
+
+# コンテナに入る
+docker-compose exec backend bash
+
+# 依存関係の更新
+docker-compose exec backend pip install -r requirements.txt
 ```
+
+### トラブルシューティング
+
+#### ファイルが同期されない場合
+1. docker-compose.dev.ymlを使用しているか確認
+2. ボリュームマウントのパスが正しいか確認
+3. コンテナを再起動: `docker-compose -f docker-compose.dev.yml restart backend`
+
+#### ポート競合エラー
+1. 既存のプロセスを確認: `lsof -i :8001`
+2. docker-compose.ymlのポート設定を変更
+
+#### ImportError
+1. 依存関係を再インストール: `docker-compose exec backend pip install -r requirements.txt`
+2. PYTHONPATH確認: コンテナ内で`echo $PYTHONPATH`
