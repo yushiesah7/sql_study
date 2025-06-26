@@ -41,10 +41,13 @@ async function handleResponse<T>(response: Response): Promise<T> {
   }
 
   // 204 No Contentなど、レスポンスボディがない場合の処理
-  if (response.status === 204 || response.headers.get('content-length') === '0') {
+  if (
+    response.status === 204 ||
+    response.headers.get('content-length') === '0'
+  ) {
     return undefined as unknown as T;
   }
-  
+
   return response.json() as Promise<T>;
 }
 

@@ -64,7 +64,7 @@ async def generate_problem(
         correct_sql = problem_info["correct_sql"]
         try:
             expected_result = await db_service.execute_select_query(correct_sql, timeout=10)
-        except DatabaseError as e:
+        except DatabaseError:
             logger.exception(f"Generated SQL failed to execute: {correct_sql}")
             raise DatabaseError(
                 message="生成された問題のSQLが実行できませんでした",

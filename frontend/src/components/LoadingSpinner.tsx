@@ -18,7 +18,6 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   className,
   text,
 }) => {
-
   return (
     <div
       className={clsx('flex flex-col items-center justify-center', className)}
