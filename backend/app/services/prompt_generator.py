@@ -222,7 +222,8 @@ class PromptGenerator:
                 col_name = col.get("column_name", "unknown")
                 data_type = col.get("data_type", "unknown")
                 is_nullable = col.get("is_nullable", "YES")
-                nullable_str = "NULL" if is_nullable == "YES" else "NOT NULL"
+                # RDBMSによる大文字小文字やスペースの違いに対応
+                nullable_str = "NULL" if is_nullable.upper().strip() == "YES" else "NOT NULL"
                 column_info.append(f"  - {col_name}: {data_type} {nullable_str}")
 
             table_info = f"テーブル: {table_name}\n" + "\n".join(column_info)

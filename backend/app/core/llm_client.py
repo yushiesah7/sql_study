@@ -72,16 +72,16 @@ class LocalAIClient:
                     if response.status_code == 200:
                         result = response.json()
                         return self._validate_response(result)
-                    else:
-                        logger.warning(
-                            f"LLM API error (attempt {attempt + 1}): {response.status_code} - {response.text}"
+
+                    logger.warning(
+                        f"LLM API error (attempt {attempt + 1}): {response.status_code} - {response.text}"
+                    )
+                    if attempt == self.max_retries - 1:
+                        raise LLMError(
+                            message=f"LLM API エラー: {response.status_code}",
+                            error_code=LLM_CONNECTION,
+                            detail=response.text,
                         )
-                        if attempt == self.max_retries - 1:
-                            raise LLMError(
-                                message=f"LLM API エラー: {response.status_code}",
-                                error_code=LLM_CONNECTION,
-                                detail=response.text,
-                            )
 
             except asyncio.TimeoutError:
                 logger.warning(f"LLM API timeout (attempt {attempt + 1})")

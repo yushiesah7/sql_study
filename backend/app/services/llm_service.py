@@ -190,7 +190,8 @@ class LLMService:
 
             # ```json から ``` までを抽出
             if "```json" in content:
-                start = content.find("```json") + 7
+                json_tag = "```json"
+                start = content.find(json_tag) + len(json_tag)
                 end = content.find("```", start)
                 if end != -1:
                     json_text = content[start:end].strip()
