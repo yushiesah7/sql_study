@@ -1,6 +1,7 @@
 """
 依存性注入の設定
 """
+
 from app.core.db import db
 from app.core.db import Database
 from app.core.llm_client import LocalAIClient

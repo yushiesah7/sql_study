@@ -65,15 +65,53 @@ docker-compose up -d
 
 ## 開発
 
-### バックエンド開発
+### 開発環境の起動（推奨）
 ```bash
-cd backend
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+# 開発用Docker環境（ボリュームマウント・ホットリロード付き）
+docker-compose -f docker-compose.dev.yml up -d
+
+# または Makefile を使用
+make dev
 ```
 
-### フロントエンド開発
+開発環境の特徴：
+- ファイルの自動同期（ホストの変更が即座にコンテナに反映）
+- ホットリロード対応（コード変更時に自動再起動）
+- データベースのポート公開（5432）
+
+### 開発用コマンド（Makefile）
 ```bash
+# 開発環境起動
+make dev
+
+# ログ確認
+make logs
+
+# Linting/Formatting
+make lint    # Ruffでコードチェック
+make format  # Ruffでコードフォーマット
+
+# テスト実行
+make test
+
+# データベース接続
+make db-shell
+
+# コンテナに入る
+make backend-shell
+make frontend-shell
+```
+
+### ローカル開発（Docker を使わない場合）
+```bash
+# バックエンド
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+
+# フロントエンド
 cd frontend
 npm install
 npm run dev
@@ -81,13 +119,13 @@ npm run dev
 
 ### テスト実行
 ```bash
-# バックエンド
-cd backend
-pytest
+# Docker環境
+docker-compose exec backend pytest
+docker-compose exec frontend npm test
 
-# フロントエンド
-cd frontend
-npm test
+# または Makefile
+make test
+make frontend-test
 ```
 
 ## プロジェクト構成
