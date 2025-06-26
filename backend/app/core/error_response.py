@@ -19,7 +19,7 @@ class ErrorResponseBuilder:
         """
         統一されたエラーレスポンスを構築
         """
-        response = {
+        response: Dict[str, Any] = {
             "error": {
                 "code": error_code,
                 "message": message,

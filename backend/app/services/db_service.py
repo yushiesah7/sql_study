@@ -63,7 +63,7 @@ class DatabaseService:
         """
         try:
             # publicスキーマのテーブル一覧を取得
-            tables = await self.db.fetch_all("""
+            tables = await self.db.execute_select("""
                 SELECT table_name 
                 FROM information_schema.tables 
                 WHERE table_schema = 'public' 
@@ -126,7 +126,7 @@ class DatabaseService:
         """
         try:
             # テーブル一覧を取得
-            tables = await self.db.fetch_all("""
+            tables = await self.db.execute_select("""
                 SELECT table_name 
                 FROM information_schema.tables 
                 WHERE table_schema = 'public' 
@@ -139,7 +139,7 @@ class DatabaseService:
                 table_name = table["table_name"]
 
                 # カラム情報を取得
-                columns = await self.db.fetch_all(
+                columns = await self.db.execute_select(
                     """
                     SELECT 
                         column_name,
@@ -155,7 +155,7 @@ class DatabaseService:
                 )
 
                 # 主キー情報を取得
-                primary_keys = await self.db.fetch_all(
+                primary_keys = await self.db.execute_select(
                     """
                     SELECT column_name
                     FROM information_schema.key_column_usage kcu
@@ -171,7 +171,7 @@ class DatabaseService:
                 pk_columns = {pk["column_name"] for pk in primary_keys}
 
                 # 外部キー情報を取得
-                foreign_keys = await self.db.fetch_all(
+                foreign_keys = await self.db.execute_select(
                     """
                     SELECT 
                         kcu.column_name,
@@ -242,10 +242,10 @@ class DatabaseService:
         """
         try:
             # タイムアウト付きで実行
-            result = await self.db.fetch_all(sql, timeout=timeout)
+            result = await self.db.execute_select(sql, timeout=timeout)
 
-            # 辞書形式に変換
-            return [dict(row) for row in result]
+            # すでに辞書形式なのでそのまま返す
+            return result
 
         except Exception as e:
             logger.error(f"Failed to execute SELECT query: {e}")
@@ -282,7 +282,7 @@ class DatabaseService:
             DatabaseError: 保存失敗時
         """
         try:
-            result = await self.db.fetch_one(
+            results = await self.db.execute_select(
                 """
                 INSERT INTO app_system.problems 
                 (theme, difficulty, correct_sql, expected_result, table_schemas, hint)
@@ -297,7 +297,7 @@ class DatabaseService:
                 hint,
             )
 
-            problem_id = result["id"]
+            problem_id = results[0]["id"] if results else None
             logger.info(f"Saved problem with ID: {problem_id}")
             return problem_id
 
@@ -323,7 +323,7 @@ class DatabaseService:
             DatabaseError: 取得失敗時
         """
         try:
-            result = await self.db.fetch_one(
+            results = await self.db.execute_select(
                 """
                 SELECT id, theme, difficulty, correct_sql, expected_result, 
                        table_schemas, hint, created_at
@@ -333,7 +333,7 @@ class DatabaseService:
                 problem_id,
             )
 
-            return dict(result) if result else None
+            return results[0] if results else None
 
         except Exception as e:
             logger.error(f"Failed to get problem {problem_id}: {e}")
