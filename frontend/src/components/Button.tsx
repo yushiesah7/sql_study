@@ -42,7 +42,7 @@ export const Button: React.FC<ButtonProps> = ({
         sizeClasses[size],
         className,
       )}
-      disabled={disabled || loading} // eslint-disable-line @typescript-eslint/prefer-nullish-coalescing
+      disabled={disabled === true || loading === true}
       {...props}
     >
       {loading && (

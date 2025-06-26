@@ -46,6 +46,7 @@ export const TableDisplay: React.FC<TableDisplayProps> = ({
           <tbody>
             {displayData.map((row, index) => (
               <tr
+                // indexをキーとして使用: SQL結果の表示専用で行の並び替えやアニメーションがないため
                 key={index}
                 className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
               >

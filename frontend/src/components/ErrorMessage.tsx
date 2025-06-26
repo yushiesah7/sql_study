@@ -54,12 +54,11 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
                 onClick={onDismiss}
                 className={clsx(
                   'inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2',
-                  variant === 'error' &&
-                    'text-red-500 hover:bg-red-100 focus:ring-red-600',
-                  variant === 'warning' &&
-                    'text-yellow-500 hover:bg-yellow-100 focus:ring-yellow-600',
-                  variant === 'info' &&
-                    'text-blue-500 hover:bg-blue-100 focus:ring-blue-600',
+                  {
+                    error: 'text-red-500 hover:bg-red-100 focus:ring-red-600',
+                    warning: 'text-yellow-500 hover:bg-yellow-100 focus:ring-yellow-600',
+                    info: 'text-blue-500 hover:bg-blue-100 focus:ring-blue-600',
+                  }[variant],
                 )}
               >
                 <span className="sr-only">閉じる</span>
