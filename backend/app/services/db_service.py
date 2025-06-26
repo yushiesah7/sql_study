@@ -6,7 +6,6 @@ from typing import List, Dict, Any, Optional
 from app.core.db import Database
 from app.core.exceptions import DatabaseError
 from app.core.error_codes import (
-    DB_CONNECTION_ERROR,
     DB_EXECUTION_ERROR,
     DB_SCHEMA_ERROR
 )

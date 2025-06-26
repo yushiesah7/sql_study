@@ -11,8 +11,7 @@ from app.services.db_service import DatabaseService
 from app.core.exceptions import LLMError, DatabaseError, NotFoundError
 from app.core.error_codes import (
     PROBLEM_GENERATION_ERROR,
-    NO_TABLES,
-    DB_EXECUTION_ERROR
+    NO_TABLES
 )
 
 logger = logging.getLogger(__name__)
@@ -65,8 +64,8 @@ async def generate_problem(
         correct_sql = problem_info["correct_sql"]
         try:
             expected_result = await db_service.execute_select_query(correct_sql, timeout=10)
-        except DatabaseError as e:
-            logger.error(f"Generated SQL failed to execute: {correct_sql}")
+        except DatabaseError:
+            logger.exception(f"Generated SQL failed to execute: {correct_sql}")
             raise DatabaseError(
                 message="生成された問題のSQLが実行できませんでした",
                 error_code=PROBLEM_GENERATION_ERROR,

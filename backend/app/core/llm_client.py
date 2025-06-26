@@ -3,7 +3,6 @@ LocalAIクライアント実装
 OpenAI API互換のHTTPクライアント
 """
 import asyncio
-import json
 import logging
 from typing import Dict, Any, Optional, List
 import httpx

@@ -1,0 +1,92 @@
+# 開発環境用のdocker-compose設定
+# 使用方法: docker-compose -f docker-compose.dev.yml up
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8001:8000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      llm:
+        condition: service_started
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # 開発用の設定
+    volumes:
+      - ./backend/app:/app/app  # アプリケーションコードをマウント
+      - ./backend/tests:/app/tests  # テストコードをマウント
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1  # .pycファイルを生成しない
+      - PYTHONUNBUFFERED=1  # 出力のバッファリングを無効化
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]  # ホットリロード有効化
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+    # 開発用の設定
+    volumes:
+      - ./frontend/src:/app/src  # ソースコードをマウント
+      - ./frontend/public:/app/public  # 静的ファイルをマウント
+      - ./frontend/next.config.js:/app/next.config.js
+      - ./frontend/tailwind.config.js:/app/tailwind.config.js
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - ./frontend/postcss.config.js:/app/postcss.config.js
+    environment:
+      - NODE_ENV=development
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: changethis
+      POSTGRES_DB: mydb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"  # 開発時はDBに直接アクセス可能にする
+
+  llm:
+    image: localai/localai:latest-aio-cpu
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./models:/models
+    command: ["--models-path", "/models", "--debug"]
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  pgdata:

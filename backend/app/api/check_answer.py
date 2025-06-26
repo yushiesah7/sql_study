@@ -11,11 +11,9 @@ from app.core.dependencies import get_llm, get_db_service
 from app.core.validators import validate_sql
 from app.services.llm_service import LLMService
 from app.services.db_service import DatabaseService
-from app.core.exceptions import LLMError, DatabaseError, NotFoundError, ValidationError
+from app.core.exceptions import LLMError, DatabaseError, NotFoundError
 from app.core.error_codes import (
-    PROBLEM_NOT_FOUND,
-    VALIDATION_INVALID_SQL,
-    DB_EXECUTION_ERROR
+    PROBLEM_NOT_FOUND
 )
 
 logger = logging.getLogger(__name__)

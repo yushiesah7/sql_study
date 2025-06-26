@@ -8,8 +8,8 @@ const nextConfig = {
         source: '/api/:path*',
         destination: 'http://backend:8001/api/:path*',
       },
-    ]
+    ];
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
