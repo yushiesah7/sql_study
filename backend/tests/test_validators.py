@@ -2,12 +2,12 @@
 SQL検証機能のテスト
 """
 
-from app.core.validators import validate_sql
 from app.core.error_codes import (
     VALIDATION_EMPTY_SQL,
-    VALIDATION_SQL_TOO_LONG,
     VALIDATION_INVALID_SQL,
+    VALIDATION_SQL_TOO_LONG,
 )
+from app.core.validators import validate_sql
 
 
 class TestValidateSQL:
@@ -65,7 +65,7 @@ class TestValidateSQL:
             assert error_code == VALIDATION_EMPTY_SQL
             assert error_message is not None
             assert "入力されていません" in error_message
-        
+
         # Noneの場合は別途テスト
         is_valid, error_code, error_message = validate_sql(None)  # type: ignore
         assert is_valid is False

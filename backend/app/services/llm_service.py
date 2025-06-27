@@ -5,12 +5,12 @@ LLMクライアントとプロンプト生成を組み合わせた高レベル�
 
 import json
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Any
 
+from app.core.error_codes import LLM_GENERATION_FAILED, LLM_INVALID_RESPONSE
+from app.core.exceptions import LLMError
 from app.core.llm_client import LocalAIClient
 from app.services.prompt_generator import PromptGenerator
-from app.core.exceptions import LLMError
-from app.core.error_codes import LLM_INVALID_RESPONSE, LLM_GENERATION_FAILED
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +22,7 @@ class LLMService:
         self.llm_client = llm_client
         self.prompt_generator = PromptGenerator()
 
-    async def generate_tables(
-        self, user_prompt: Optional[str] = None
-    ) -> Dict[str, Any]:
+    async def generate_tables(self, user_prompt: str | None = None) -> dict[str, Any]:
         """
         テーブル作成SQL生成
 
@@ -67,8 +65,8 @@ class LLMService:
             )
 
     async def generate_problem(
-        self, table_schemas: List[Dict[str, Any]], user_prompt: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, table_schemas: list[dict[str, Any]], user_prompt: str | None = None
+    ) -> dict[str, Any]:
         """
         問題生成
 
@@ -119,10 +117,10 @@ class LLMService:
     async def check_answer(
         self,
         user_sql: str,
-        user_result: List[Dict[str, Any]],
-        expected_result: List[Dict[str, Any]],
-        table_schemas: List[Dict[str, Any]],
-    ) -> Dict[str, Any]:
+        user_result: list[dict[str, Any]],
+        expected_result: list[dict[str, Any]],
+        table_schemas: list[dict[str, Any]],
+    ) -> dict[str, Any]:
         """
         回答チェック
 
@@ -171,7 +169,7 @@ class LLMService:
                 detail=str(e),
             )
 
-    def _parse_json_response(self, content: str) -> Dict[str, Any]:
+    def _parse_json_response(self, content: str) -> dict[str, Any]:
         """
         LLMレスポンスからJSONを解析
 
@@ -201,7 +199,7 @@ class LLMService:
                 # JSONブロックがない場合は全体をJSONとして扱う
                 json_text = content
 
-            parsed_json: Dict[str, Any] = json.loads(json_text)
+            parsed_json: dict[str, Any] = json.loads(json_text)
             return parsed_json
 
         except (json.JSONDecodeError, ValueError) as e:
@@ -209,10 +207,10 @@ class LLMService:
             raise LLMError(
                 message="LLM応答の解析に失敗しました",
                 error_code=LLM_INVALID_RESPONSE,
-                detail=f"JSONフォーマットエラー: {str(e)}",
+                detail=f"JSONフォーマットエラー: {e!s}",
             )
 
-    def _validate_table_generation_result(self, result: Dict[str, Any]) -> None:
+    def _validate_table_generation_result(self, result: dict[str, Any]) -> None:
         """テーブル生成結果の検証"""
         required_fields = ["theme", "sql_statements"]
         for field in required_fields:
@@ -230,7 +228,7 @@ class LLMService:
                 detail="sql_statements は配列である必要があります",
             )
 
-    def _validate_problem_generation_result(self, result: Dict[str, Any]) -> None:
+    def _validate_problem_generation_result(self, result: dict[str, Any]) -> None:
         """問題生成結果の検証"""
         required_fields = ["difficulty", "correct_sql", "expected_result"]
         for field in required_fields:
@@ -248,7 +246,7 @@ class LLMService:
                 detail="expected_result は配列である必要があります",
             )
 
-    def _validate_answer_check_result(self, result: Dict[str, Any]) -> None:
+    def _validate_answer_check_result(self, result: dict[str, Any]) -> None:
         """回答チェック結果の検証"""
         required_fields = ["is_correct", "feedback"]
         for field in required_fields:

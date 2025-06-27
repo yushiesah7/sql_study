@@ -3,11 +3,11 @@ SQL検証関数
 """
 
 import re
-from typing import Tuple, Optional
+
 from .error_codes import (
     VALIDATION_EMPTY_SQL,
-    VALIDATION_SQL_TOO_LONG,
     VALIDATION_INVALID_SQL,
+    VALIDATION_SQL_TOO_LONG,
 )
 
 # 危険なSQL文のパターン
@@ -25,7 +25,7 @@ ALLOWED_PATTERNS = [
 ]
 
 
-def validate_sql(sql: str) -> Tuple[bool, Optional[str], Optional[str]]:
+def validate_sql(sql: str) -> tuple[bool, str | None, str | None]:
     """
     SQLの安全性を検証
 

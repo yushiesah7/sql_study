@@ -3,10 +3,11 @@
 """
 
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any
+
 from app.core.db import Database
-from app.core.exceptions import DatabaseError
 from app.core.error_codes import DB_EXECUTION_ERROR, DB_SCHEMA_ERROR
+from app.core.exceptions import DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -64,9 +65,9 @@ class DatabaseService:
         try:
             # publicスキーマのテーブル一覧を取得
             tables = await self.db.execute_select("""
-                SELECT table_name 
-                FROM information_schema.tables 
-                WHERE table_schema = 'public' 
+                SELECT table_name
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
                 AND table_type = 'BASE TABLE'
             """)
 
@@ -89,7 +90,7 @@ class DatabaseService:
                 detail=str(e),
             )
 
-    async def execute_sql_statements(self, sql_statements: List[str]) -> None:
+    async def execute_sql_statements(self, sql_statements: list[str]) -> None:
         """
         SQL文を順次実行
 
@@ -114,7 +115,7 @@ class DatabaseService:
                 detail=str(e),
             )
 
-    async def get_table_schemas(self) -> List[Dict[str, Any]]:
+    async def get_table_schemas(self) -> list[dict[str, Any]]:
         """
         publicスキーマのテーブル構造を取得
 
@@ -127,9 +128,9 @@ class DatabaseService:
         try:
             # テーブル一覧を取得
             tables = await self.db.execute_select("""
-                SELECT table_name 
-                FROM information_schema.tables 
-                WHERE table_schema = 'public' 
+                SELECT table_name
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
                 AND table_type = 'BASE TABLE'
                 ORDER BY table_name
             """)
@@ -141,13 +142,13 @@ class DatabaseService:
                 # カラム情報を取得
                 columns = await self.db.execute_select(
                     """
-                    SELECT 
+                    SELECT
                         column_name,
                         data_type,
                         is_nullable,
                         column_default
-                    FROM information_schema.columns 
-                    WHERE table_schema = 'public' 
+                    FROM information_schema.columns
+                    WHERE table_schema = 'public'
                     AND table_name = $1
                     ORDER BY ordinal_position
                 """,
@@ -159,9 +160,9 @@ class DatabaseService:
                     """
                     SELECT column_name
                     FROM information_schema.key_column_usage kcu
-                    JOIN information_schema.table_constraints tc 
+                    JOIN information_schema.table_constraints tc
                         ON kcu.constraint_name = tc.constraint_name
-                    WHERE tc.table_schema = 'public' 
+                    WHERE tc.table_schema = 'public'
                     AND tc.table_name = $1
                     AND tc.constraint_type = 'PRIMARY KEY'
                 """,
@@ -173,7 +174,7 @@ class DatabaseService:
                 # 外部キー情報を取得
                 foreign_keys = await self.db.execute_select(
                     """
-                    SELECT 
+                    SELECT
                         kcu.column_name,
                         ccu.table_name AS foreign_table_name,
                         ccu.column_name AS foreign_column_name
@@ -226,7 +227,7 @@ class DatabaseService:
 
     async def execute_select_query(
         self, sql: str, timeout: int = 5
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         SELECT文を実行して結果を取得
 
@@ -260,9 +261,9 @@ class DatabaseService:
         theme: str,
         difficulty: str,
         correct_sql: str,
-        expected_result: List[Dict[str, Any]],
-        table_schemas: List[Dict[str, Any]],
-        hint: Optional[str] = None,
+        expected_result: list[dict[str, Any]],
+        table_schemas: list[dict[str, Any]],
+        hint: str | None = None,
     ) -> int:
         """
         問題をデータベースに保存
@@ -284,7 +285,7 @@ class DatabaseService:
         try:
             results = await self.db.execute_select(
                 """
-                INSERT INTO app_system.problems 
+                INSERT INTO app_system.problems
                 (theme, difficulty, correct_sql, expected_result, table_schemas, hint)
                 VALUES ($1, $2, $3, $4, $5, $6)
                 RETURNING id
@@ -315,7 +316,7 @@ class DatabaseService:
                 detail=str(e),
             )
 
-    async def get_problem(self, problem_id: int) -> Optional[Dict[str, Any]]:
+    async def get_problem(self, problem_id: int) -> dict[str, Any] | None:
         """
         問題を取得
 
@@ -331,9 +332,9 @@ class DatabaseService:
         try:
             results = await self.db.execute_select(
                 """
-                SELECT id, theme, difficulty, correct_sql, expected_result, 
+                SELECT id, theme, difficulty, correct_sql, expected_result,
                        table_schemas, hint, created_at
-                FROM app_system.problems 
+                FROM app_system.problems
                 WHERE id = $1
             """,
                 problem_id,

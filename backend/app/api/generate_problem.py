@@ -4,13 +4,15 @@
 """
 
 import logging
+
 from fastapi import APIRouter, Depends, HTTPException
+
+from app.core.dependencies import get_db_service, get_llm
+from app.core.error_codes import NO_TABLES, PROBLEM_GENERATION_ERROR
+from app.core.exceptions import DatabaseError, LLMError, NotFoundError
 from app.schemas import UniversalRequest, UniversalResponse
-from app.core.dependencies import get_llm, get_db_service
-from app.services.llm_service import LLMService
 from app.services.db_service import DatabaseService
-from app.core.exceptions import LLMError, DatabaseError, NotFoundError
-from app.core.error_codes import PROBLEM_GENERATION_ERROR, NO_TABLES
+from app.services.llm_service import LLMService
 
 logger = logging.getLogger(__name__)
 

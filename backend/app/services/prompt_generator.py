@@ -3,8 +3,8 @@
 LLMに送信するプロンプトを生成する
 """
 
-from typing import Optional, List, Dict, Any
 import json
+from typing import Any
 
 
 class PromptGenerator:
@@ -12,8 +12,8 @@ class PromptGenerator:
 
     @staticmethod
     def create_table_generation_prompt(
-        user_prompt: Optional[str] = None,
-    ) -> List[Dict[str, str]]:
+        user_prompt: str | None = None,
+    ) -> list[dict[str, str]]:
         """
         テーブル作成用プロンプトを生成
 
@@ -24,7 +24,7 @@ class PromptGenerator:
             LLMに送信するメッセージリスト
         """
         system_message = """あなたはSQL学習アプリのためのテーブル設計アシスタントです。
-        
+
 **目的**: 学習者がSQLの練習をするためのテーブルとサンプルデータを作成してください。
 
 **要件**:
@@ -67,8 +67,8 @@ class PromptGenerator:
 
     @staticmethod
     def create_problem_generation_prompt(
-        table_schemas: List[Dict[str, Any]], user_prompt: Optional[str] = None
-    ) -> List[Dict[str, str]]:
+        table_schemas: list[dict[str, Any]], user_prompt: str | None = None
+    ) -> list[dict[str, str]]:
         """
         問題生成用プロンプトを生成
 
@@ -128,10 +128,10 @@ class PromptGenerator:
     @staticmethod
     def create_answer_check_prompt(
         user_sql: str,
-        user_result: List[Dict[str, Any]],
-        expected_result: List[Dict[str, Any]],
-        table_schemas: List[Dict[str, Any]],
-    ) -> List[Dict[str, str]]:
+        user_result: list[dict[str, Any]],
+        expected_result: list[dict[str, Any]],
+        table_schemas: list[dict[str, Any]],
+    ) -> list[dict[str, str]]:
         """
         回答チェック用プロンプトを生成
 
@@ -199,7 +199,7 @@ class PromptGenerator:
         ]
 
     @staticmethod
-    def _format_table_schemas(table_schemas: List[Dict[str, Any]]) -> str:
+    def _format_table_schemas(table_schemas: list[dict[str, Any]]) -> str:
         """
         テーブルスキーマ情報を読みやすい形式にフォーマット
 

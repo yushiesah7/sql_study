@@ -4,12 +4,14 @@
 """
 
 import logging
+
 from fastapi import APIRouter, Depends, HTTPException
-from app.schemas import UniversalResponse
+
 from app.core.dependencies import get_db_service
-from app.services.db_service import DatabaseService
-from app.core.exceptions import DatabaseError, NotFoundError
 from app.core.error_codes import NO_TABLES, SCHEMA_FETCH_ERROR
+from app.core.exceptions import DatabaseError, NotFoundError
+from app.schemas import UniversalResponse
+from app.services.db_service import DatabaseService
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +19,9 @@ router = APIRouter()
 
 
 @router.get("/table-schemas", response_model=UniversalResponse)
-async def get_table_schemas(db_service: DatabaseService = Depends(get_db_service)) -> UniversalResponse:
+async def get_table_schemas(
+    db_service: DatabaseService = Depends(get_db_service),
+) -> UniversalResponse:
     """
     現在のテーブル構造を取得
 

@@ -3,9 +3,10 @@
 """
 
 import json
-from typing import List, Any
-from pydantic_settings import BaseSettings
+from typing import Any
+
 from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -30,7 +31,7 @@ class Settings(BaseSettings):
     LLM_MAX_TOKENS: int = Field(default=2000)
 
     # CORS
-    ALLOWED_ORIGINS: List[str] = Field(
+    ALLOWED_ORIGINS: list[str] = Field(
         default=["http://localhost:3000", "http://frontend:3000"]
     )
 
@@ -40,7 +41,7 @@ class Settings(BaseSettings):
 
     @field_validator("ALLOWED_ORIGINS", mode="before")
     @classmethod
-    def parse_cors(cls, v: Any) -> List[str]:
+    def parse_cors(cls, v: Any) -> list[str]:
         if isinstance(v, str):
             # まずJSON形式を試す
             try:

@@ -5,17 +5,18 @@ OpenAI API互換のHTTPクライアント
 
 import asyncio
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Any
+
 import httpx
 
 from app.core.config import settings
-from app.core.exceptions import LLMError
 from app.core.error_codes import (
     LLM_CONNECTION,
-    LLM_TIMEOUT,
-    LLM_INVALID_RESPONSE,
     LLM_GENERATION_FAILED,
+    LLM_INVALID_RESPONSE,
+    LLM_TIMEOUT,
 )
+from app.core.exceptions import LLMError
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +34,10 @@ class LocalAIClient:
 
     async def chat_completion(
         self,
-        messages: List[Dict[str, str]],
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
-    ) -> Dict[str, Any]:
+        messages: list[dict[str, str]],
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> dict[str, Any]:
         """
         チャット補完APIを呼び出し
 
@@ -83,7 +84,7 @@ class LocalAIClient:
                             detail=response.text,
                         )
 
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 logger.warning(f"LLM API timeout (attempt {attempt + 1})")
                 if attempt == self.max_retries - 1:
                     raise LLMError(
@@ -121,7 +122,7 @@ class LocalAIClient:
             detail=f"{self.max_retries}回試行しました",
         )
 
-    def _validate_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
+    def _validate_response(self, response: dict[str, Any]) -> dict[str, Any]:
         """
         LLMレスポンスの検証
 
@@ -157,10 +158,10 @@ class LocalAIClient:
             raise LLMError(
                 message="LLM応答が不正です",
                 error_code=LLM_INVALID_RESPONSE,
-                detail=f"期待される形式: OpenAI chat completions. エラー: {str(e)}",
+                detail=f"期待される形式: OpenAI chat completions. エラー: {e!s}",
             )
 
-    def extract_content(self, response: Dict[str, Any]) -> str:
+    def extract_content(self, response: dict[str, Any]) -> str:
         """
         レスポンスからコンテンツを抽出
 

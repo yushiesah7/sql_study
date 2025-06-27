@@ -2,11 +2,10 @@
 依存性注入の設定
 """
 
-from app.core.db import db
-from app.core.db import Database
+from app.core.db import Database, db
 from app.core.llm_client import LocalAIClient
-from app.services.llm_service import LLMService
 from app.services.db_service import DatabaseService
+from app.services.llm_service import LLMService
 
 
 async def get_db() -> Database:
