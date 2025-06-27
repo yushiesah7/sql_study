@@ -62,15 +62,15 @@ class Database:
             yield connection
 
     async def execute_select(
-        self, query: str, *args: Any, timeout: float | None = None
+        self, query: str, *args: Any, query_timeout: float | None = None
     ) -> list[dict[str, Any]]:
         """SELECT文を実行"""
         try:
             async with self.acquire() as conn:
                 # タイムアウト設定
-                if timeout:
+                if query_timeout:
                     rows = await asyncio.wait_for(
-                        conn.fetch(query, *args), timeout=timeout
+                        conn.fetch(query, *args), timeout=query_timeout
                     )
                 else:
                     rows = await conn.fetch(query, *args)
@@ -82,7 +82,7 @@ class Database:
             raise DatabaseError(
                 message="SQL実行タイムアウト",
                 error_code="DB_TIMEOUT_ERROR",
-                detail=f"制限時間: {timeout}秒",
+                detail=f"制限時間: {query_timeout}秒",
             ) from None
         except asyncpg.PostgresSyntaxError as e:
             raise DatabaseError(
@@ -95,7 +95,7 @@ class Database:
             ) from None
 
     async def execute(self, query: str, *args: Any) -> Any:
-        """任意のSQLを実行（CREATE/DROP等）"""
+        """任意のSQLを実行(CREATE/DROP等)"""
         try:
             async with self.acquire() as conn:
                 result = await conn.execute(query, *args)
@@ -143,7 +143,7 @@ class Database:
         return tables
 
     async def drop_all_tables(self) -> None:
-        """全てのテーブルを削除（開発用）"""
+        """全てのテーブルを削除(開発用)"""
         try:
             async with self.acquire() as conn:
                 # 外部キー制約を一時的に無効化

@@ -163,7 +163,9 @@ async def check_answer(
 
         # 3. ユーザーSQLの実行
         try:
-            user_result = await db_service.execute_select_query(user_sql, timeout=5)
+            user_result = await db_service.execute_select_query(
+                user_sql, query_timeout=5
+            )
         except DatabaseError as e:
             # SQL構文エラーの場合は詳細なヒントを提供
             return UniversalResponse(
