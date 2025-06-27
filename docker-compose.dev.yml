@@ -26,6 +26,7 @@ services:
     volumes:
       - ./backend/app:/app/app  # アプリケーションコードをマウント
       - ./backend/tests:/app/tests  # テストコードをマウント
+      - ./backend/pyproject.toml:/app/pyproject.toml  # pyproject.tomlをマウント
     environment:
       - PYTHONDONTWRITEBYTECODE=1  # .pycファイルを生成しない
       - PYTHONUNBUFFERED=1  # 出力のバッファリングを無効化

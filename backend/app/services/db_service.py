@@ -14,10 +14,10 @@ logger = logging.getLogger(__name__)
 class DatabaseService:
     """データベース操作サービスクラス"""
 
-    def __init__(self, db: Database):
+    def __init__(self, db: Database) -> None:
         self.db = db
 
-    async def initialize_system_schema(self):
+    async def initialize_system_schema(self) -> None:
         """
         システム用スキーマとテーブルを初期化
 
@@ -54,7 +54,7 @@ class DatabaseService:
                 detail=str(e),
             )
 
-    async def drop_all_user_tables(self):
+    async def drop_all_user_tables(self) -> None:
         """
         publicスキーマのユーザーテーブルを全削除
 
@@ -89,7 +89,7 @@ class DatabaseService:
                 detail=str(e),
             )
 
-    async def execute_sql_statements(self, sql_statements: List[str]):
+    async def execute_sql_statements(self, sql_statements: List[str]) -> None:
         """
         SQL文を順次実行
 
@@ -297,7 +297,13 @@ class DatabaseService:
                 hint,
             )
 
-            problem_id = results[0]["id"] if results else None
+            if not results:
+                raise DatabaseError(
+                    message="問題のIDが返されませんでした",
+                    error_code=DB_EXECUTION_ERROR,
+                    detail="INSERT文のRETURNINGが失敗しました",
+                )
+            problem_id: int = results[0]["id"]
             logger.info(f"Saved problem with ID: {problem_id}")
             return problem_id
 

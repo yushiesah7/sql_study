@@ -22,7 +22,7 @@ async def create_tables(
     request: UniversalRequest,
     llm_service: LLMService = Depends(get_llm),
     db_service: DatabaseService = Depends(get_db_service),
-):
+) -> UniversalResponse:
     """
     学習用テーブルとサンプルデータを作成
 

@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class LocalAIClient:
     """LocalAI HTTPクライアント"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.base_url = settings.LLM_API_URL
         self.model_name = settings.LLM_MODEL_NAME
         self.timeout = settings.LLM_TIMEOUT
@@ -170,7 +170,8 @@ class LocalAIClient:
         Returns:
             生成されたテキストコンテンツ
         """
-        return response["choices"][0]["message"]["content"].strip()
+        content: str = response["choices"][0]["message"]["content"]
+        return content.strip()
 
     async def check_health(self) -> bool:
         """

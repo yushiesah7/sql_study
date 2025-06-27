@@ -17,7 +17,7 @@ router = APIRouter()
 
 
 @router.get("/table-schemas", response_model=UniversalResponse)
-async def get_table_schemas(db_service: DatabaseService = Depends(get_db_service)):
+async def get_table_schemas(db_service: DatabaseService = Depends(get_db_service)) -> UniversalResponse:
     """
     現在のテーブル構造を取得
 

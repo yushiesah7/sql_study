@@ -2,7 +2,7 @@
 アプリケーション設定
 """
 
-from typing import List
+from typing import List, Any
 from pydantic_settings import BaseSettings
 from pydantic import Field, field_validator
 
@@ -39,10 +39,13 @@ class Settings(BaseSettings):
 
     @field_validator("ALLOWED_ORIGINS", mode="before")
     @classmethod
-    def parse_cors(cls, v):
+    def parse_cors(cls, v: Any) -> List[str]:
         if isinstance(v, str):
             return [i.strip() for i in v.split(",")]
-        return v
+        elif isinstance(v, list):
+            return v
+        else:
+            return []
 
     model_config = {"env_file": ".env", "case_sensitive": True}
 
