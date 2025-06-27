@@ -26,7 +26,7 @@ def _compare_results(
     user_result: list[dict[str, Any]], expected_result: list[dict[str, Any]]
 ) -> bool:
     """
-    クエリ結果を比較（カラム順序無視）
+    クエリ結果を比較(カラム順序無視)
 
     Args:
         user_result: ユーザーの実行結果
@@ -51,9 +51,9 @@ def _compare_results(
     if user_columns != expected_columns:
         return False
 
-    # 行の比較（順序を考慮してソート）
+    # 行の比較(順序を考慮してソート)
     def normalize_value(value: Any) -> tuple[str, Any]:
-        """値を正規化（浮動小数点数の比較を考慮）"""
+        """値を正規化(浮動小数点数の比較を考慮)"""
         if isinstance(value, float):
             return ("float", value)
         return ("other", value)
@@ -65,7 +65,7 @@ def _compare_results(
         row1: tuple[tuple[str, tuple[str, Any]], ...],
         row2: tuple[tuple[str, tuple[str, Any]], ...],
     ) -> bool:
-        """行同士を比較（浮動小数点数の近似値比較を含む）"""
+        """行同士を比較(浮動小数点数の近似値比較を含む)"""
         for (k1, (type1, v1)), (k2, (type2, v2)) in zip(row1, row2, strict=False):
             if k1 != k2 or type1 != type2:
                 return False
@@ -132,11 +132,11 @@ async def check_answer(
         except (TypeError, ValueError):
             raise HTTPException(
                 status_code=400, detail="problem_idは数値である必要があります"
-            )
+            ) from None
 
         logger.info(f"Checking answer for problem {problem_id}")
 
-        # 1. SQL検証（SELECT文のみ許可）
+        # 1. SQL検証(SELECT文のみ許可)
         is_valid, error_code, error_message = validate_sql(user_sql)
         if not is_valid:
             return UniversalResponse(
@@ -172,7 +172,8 @@ async def check_answer(
                 data={
                     "is_correct": False,
                     "error_message": str(e.detail),
-                    "hint": "SQL構文を確認してください。テーブル名やカラム名に誤りがないか確認しましょう。",
+                    "hint": "SQL構文を確認してください。"
+                    "テーブル名やカラム名に誤りがないか確認しましょう。",
                 },
             )
 
@@ -210,7 +211,8 @@ async def check_answer(
             )
 
         logger.info(
-            f"Answer check completed for problem {problem_id}: {'correct' if is_correct else 'incorrect'}"
+            f"Answer check completed for problem {problem_id}: "
+            f"{'correct' if is_correct else 'incorrect'}"
         )
 
         return UniversalResponse(

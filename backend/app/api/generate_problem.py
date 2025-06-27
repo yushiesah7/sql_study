@@ -29,7 +29,7 @@ async def generate_problem(
     SQL学習問題を生成
 
     Args:
-        request: リクエストデータ（prompt: 省略可、最大1000文字）
+        request: リクエストデータ(prompt: 省略可、最大1000文字)
 
     Returns:
         問題ID、実行結果、メタデータ
@@ -38,7 +38,7 @@ async def generate_problem(
         HTTPException: 生成失敗時
     """
     try:
-        # プロンプトの取得（最大1000文字）
+        # プロンプトの取得(最大1000文字)
         prompt = request.prompt
         if prompt and len(prompt) > 1000:
             raise HTTPException(
@@ -58,7 +58,7 @@ async def generate_problem(
             )
 
         # 2. LLMに問題を生成させる
-        # TODO: 前回の正答率から難易度を自動調整（1-10レベル）
+        # TODO: 前回の正答率から難易度を自動調整(1-10レベル)
         problem_info = await llm_service.generate_problem(table_schemas, prompt)
 
         # 3. 生成されたSQLを実行して結果を取得
@@ -75,7 +75,7 @@ async def generate_problem(
                 detail=f"SQL: {correct_sql[:100]}...",
             )
 
-        # 結果の行数チェック（3-10行でなければ再生成）
+        # 結果の行数チェック(3-10行でなければ再生成)
         if not (3 <= len(expected_result) <= 10):
             logger.warning(
                 f"Generated problem has {len(expected_result)} rows, outside range 3-10"
