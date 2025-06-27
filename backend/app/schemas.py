@@ -56,9 +56,7 @@ class CheckAnswerResponse(BaseModel):
     expected_result: list[dict[str, Any]] | None = Field(
         None, description="期待される実行結果"
     )
-    error_type: str | None = Field(
-        None, description="エラータイプ(syntax/logic/none)"
-    )
+    error_type: str | None = Field(None, description="エラータイプ(syntax/logic/none)")
     error_message: str | None = Field(None, description="エラーメッセージ")
     hint: str | None = Field(None, description="ヒント")
     execution_time: float = Field(..., description="実行時間(秒)")
