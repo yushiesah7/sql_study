@@ -43,7 +43,7 @@ class TestSettings:
 
     def test_cors_string_parsing(self):
         """CORS設定の文字列解析テスト"""
-        # 環境変数をモック（JSON形式）
+        # 環境変数をモック(JSON形式)
         os.environ["ALLOWED_ORIGINS"] = (
             '["http://test1.com", "http://test2.com", "http://test3.com"]'
         )
@@ -61,7 +61,7 @@ class TestSettings:
 
     def test_cors_comma_separated_parsing(self):
         """CORS設定のカンマ区切り解析テスト"""
-        # 環境変数をモック（カンマ区切り形式）
+        # 環境変数をモック(カンマ区切り形式)
         os.environ["ALLOWED_ORIGINS"] = (
             "http://test1.com,http://test2.com,http://test3.com"
         )

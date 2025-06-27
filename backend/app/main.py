@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     """アプリケーションライフサイクル管理"""
     # 起動時処理
     logger.info(f"Starting {settings.APP_NAME} v{__version__}")
@@ -66,7 +66,7 @@ app.add_middleware(
 
 # グローバルエラーハンドラー
 @app.exception_handler(AppException)
-async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
+async def app_exception_handler(_request: Request, exc: AppException) -> JSONResponse:
     """アプリケーション例外ハンドラー"""
     logger.error(f"AppException: {exc.error_code} - {exc.message}", exc_info=True)
     return JSONResponse(
@@ -81,7 +81,7 @@ async def app_exception_handler(request: Request, exc: AppException) -> JSONResp
 
 
 @app.exception_handler(Exception)
-async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+async def general_exception_handler(_request: Request, exc: Exception) -> JSONResponse:
     """汎用例外ハンドラー"""
     logger.error(f"Unhandled exception: {exc!s}", exc_info=True)
     return JSONResponse(

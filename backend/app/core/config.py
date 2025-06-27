@@ -47,8 +47,9 @@ class Settings(BaseSettings):
                 if isinstance(parsed, list):
                     return parsed
             except (json.JSONDecodeError, ValueError):
-                # カンマ区切りとして処理
-                return [i.strip() for i in self.ALLOWED_ORIGINS.split(",")]
+                pass
+            # JSON解析に失敗した場合、またはlistでない場合はカンマ区切りとして処理
+            return [i.strip() for i in self.ALLOWED_ORIGINS.split(",")]
         elif isinstance(self.ALLOWED_ORIGINS, list):
             return self.ALLOWED_ORIGINS
         else:

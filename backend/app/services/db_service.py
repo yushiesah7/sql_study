@@ -226,14 +226,14 @@ class DatabaseService:
             ) from None
 
     async def execute_select_query(
-        self, sql: str, timeout: int = 5
+        self, sql: str, query_timeout: int = 5
     ) -> list[dict[str, Any]]:
         """
         SELECT文を実行して結果を取得
 
         Args:
             sql: 実行するSELECT文
-            timeout: タイムアウト秒数
+            query_timeout: タイムアウト秒数
 
         Returns:
             クエリ結果
@@ -243,7 +243,7 @@ class DatabaseService:
         """
         try:
             # タイムアウト付きで実行
-            result = await self.db.execute_select(sql, timeout=timeout)
+            result = await self.db.execute_select(sql, query_timeout=query_timeout)
 
             # すでに辞書形式なのでそのまま返す
             return result
@@ -324,7 +324,7 @@ class DatabaseService:
             problem_id: 問題ID
 
         Returns:
-            問題情報（存在しない場合はNone）
+            問題情報(存在しない場合はNone)
 
         Raises:
             DatabaseError: 取得失敗時

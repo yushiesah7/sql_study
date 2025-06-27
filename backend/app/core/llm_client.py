@@ -43,8 +43,8 @@ class LocalAIClient:
 
         Args:
             messages: チャットメッセージのリスト
-            temperature: サンプリング温度（オプション）
-            max_tokens: 最大トークン数（オプション）
+            temperature: サンプリング温度(オプション)
+            max_tokens: 最大トークン数(オプション)
 
         Returns:
             LLMからのレスポンス
