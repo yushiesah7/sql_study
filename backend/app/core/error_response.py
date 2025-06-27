@@ -2,8 +2,8 @@
 エラーレスポンスビルダー
 """
 
-from typing import Dict, Any, Optional
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from typing import Any
 
 
 class ErrorResponseBuilder:
@@ -13,17 +13,17 @@ class ErrorResponseBuilder:
     def build(
         error_code: str,
         message: str,
-        detail: Optional[str] = None,
-        data: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        detail: str | None = None,
+        data: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """
         統一されたエラーレスポンスを構築
         """
-        response: Dict[str, Any] = {
+        response: dict[str, Any] = {
             "error": {
                 "code": error_code,
                 "message": message,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             }
         }
 

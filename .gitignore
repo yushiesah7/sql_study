@@ -57,3 +57,7 @@ models/*.safetensors
 *.tmp
 *.temp
 .cache/
+*.bak
+
+# Local scripts
+fix_*.py

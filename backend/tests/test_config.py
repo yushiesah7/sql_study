@@ -3,6 +3,7 @@
 """
 
 import os
+
 from app.core.config import Settings
 
 
@@ -32,8 +33,9 @@ class TestSettings:
         assert settings.LLM_MAX_TOKENS == 2000
 
         # CORS設定
-        assert isinstance(settings.ALLOWED_ORIGINS, list)
-        assert "http://localhost:3000" in settings.ALLOWED_ORIGINS
+        origins = settings.get_allowed_origins()
+        assert isinstance(origins, list)
+        assert "http://localhost:3000" in origins
 
         # セキュリティ設定
         assert settings.SQL_EXECUTION_TIMEOUT == 5.0
@@ -41,17 +43,37 @@ class TestSettings:
 
     def test_cors_string_parsing(self):
         """CORS設定の文字列解析テスト"""
-        # 環境変数をモック
+        # 環境変数をモック（JSON形式）
+        os.environ["ALLOWED_ORIGINS"] = (
+            '["http://test1.com", "http://test2.com", "http://test3.com"]'
+        )
+
+        settings = Settings()
+
+        origins = settings.get_allowed_origins()
+        assert len(origins) == 3
+        assert "http://test1.com" in origins
+        assert "http://test2.com" in origins
+        assert "http://test3.com" in origins
+
+        # クリーンアップ
+        del os.environ["ALLOWED_ORIGINS"]
+
+    def test_cors_comma_separated_parsing(self):
+        """CORS設定のカンマ区切り解析テスト"""
+        # 環境変数をモック（カンマ区切り形式）
         os.environ["ALLOWED_ORIGINS"] = (
             "http://test1.com,http://test2.com,http://test3.com"
         )
 
         settings = Settings()
 
-        assert len(settings.ALLOWED_ORIGINS) == 3
-        assert "http://test1.com" in settings.ALLOWED_ORIGINS
-        assert "http://test2.com" in settings.ALLOWED_ORIGINS
-        assert "http://test3.com" in settings.ALLOWED_ORIGINS
+        # カンマ区切りとして正しく解析される
+        origins = settings.get_allowed_origins()
+        assert len(origins) == 3
+        assert "http://test1.com" in origins
+        assert "http://test2.com" in origins
+        assert "http://test3.com" in origins
 
         # クリーンアップ
         del os.environ["ALLOWED_ORIGINS"]
@@ -60,9 +82,10 @@ class TestSettings:
         """CORS設定のリスト形式テスト"""
         settings = Settings(ALLOWED_ORIGINS=["http://example.com", "http://test.com"])
 
-        assert len(settings.ALLOWED_ORIGINS) == 2
-        assert "http://example.com" in settings.ALLOWED_ORIGINS
-        assert "http://test.com" in settings.ALLOWED_ORIGINS
+        origins = settings.get_allowed_origins()
+        assert len(origins) == 2
+        assert "http://example.com" in origins
+        assert "http://test.com" in origins
 
     def test_cors_with_spaces(self):
         """CORS設定のスペース処理テスト"""
@@ -73,10 +96,11 @@ class TestSettings:
         settings = Settings()
 
         # スペースが正しく削除されているか確認
-        assert "http://test1.com" in settings.ALLOWED_ORIGINS
-        assert "http://test2.com" in settings.ALLOWED_ORIGINS
-        assert "http://test3.com" in settings.ALLOWED_ORIGINS
-        assert " http://test1.com " not in settings.ALLOWED_ORIGINS
+        origins = settings.get_allowed_origins()
+        assert "http://test1.com" in origins
+        assert "http://test2.com" in origins
+        assert "http://test3.com" in origins
+        assert " http://test1.com " not in origins
 
         # クリーンアップ
         del os.environ["ALLOWED_ORIGINS"]

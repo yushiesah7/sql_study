@@ -25,16 +25,19 @@
 ### 0.3 環境変数設定
 ```env
 # .env.example
-# Database
-DATABASE_URL=postgresql://postgres:changethis@localhost:5432/mydb
+# Database (Dockerコンテナ名を使用)
+DATABASE_URL=postgresql://postgres:changethis@db:5432/mydb
 
-# LocalAI
-LLM_API_URL=http://localhost:8080/v1
+# LocalAI (Dockerコンテナ名を使用)
+LLM_API_URL=http://llm:8080/v1
 LLM_MODEL_NAME=gpt-3.5-turbo
 LLM_TIMEOUT=30.0
 
 # Frontend
-NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_URL=http://localhost:8001
+
+# CORS設定
+ALLOWED_ORIGINS=["http://localhost:3000","http://frontend:3000"]
 ```
 
 ---

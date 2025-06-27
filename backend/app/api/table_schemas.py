@@ -4,12 +4,14 @@
 """
 
 import logging
+
 from fastapi import APIRouter, Depends, HTTPException
-from app.schemas import UniversalResponse
+
 from app.core.dependencies import get_db_service
-from app.services.db_service import DatabaseService
-from app.core.exceptions import DatabaseError, NotFoundError
 from app.core.error_codes import NO_TABLES, SCHEMA_FETCH_ERROR
+from app.core.exceptions import DatabaseError, NotFoundError
+from app.schemas import UniversalResponse
+from app.services.db_service import DatabaseService
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +19,9 @@ router = APIRouter()
 
 
 @router.get("/table-schemas", response_model=UniversalResponse)
-async def get_table_schemas(db_service: DatabaseService = Depends(get_db_service)) -> UniversalResponse:
+async def get_table_schemas(
+    db_service: DatabaseService = Depends(get_db_service),
+) -> UniversalResponse:
     """
     現在のテーブル構造を取得
 
@@ -100,7 +104,7 @@ async def get_table_schemas(db_service: DatabaseService = Depends(get_db_service
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except DatabaseError as e:
         logger.error(f"Database error during schema fetch: {e}")
@@ -111,7 +115,7 @@ async def get_table_schemas(db_service: DatabaseService = Depends(get_db_service
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except Exception as e:
         logger.error(f"Unexpected error during schema fetch: {e}")
@@ -122,4 +126,4 @@ async def get_table_schemas(db_service: DatabaseService = Depends(get_db_service
                 "message": "テーブル構造の取得に失敗しました",
                 "detail": str(e),
             },
-        )
+        ) from None

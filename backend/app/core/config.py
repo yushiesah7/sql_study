@@ -2,9 +2,10 @@
 アプリケーション設定
 """
 
-from typing import List, Any
-from pydantic_settings import BaseSettings
-from pydantic import Field, field_validator
+import json
+
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -29,7 +30,7 @@ class Settings(BaseSettings):
     LLM_MAX_TOKENS: int = Field(default=2000)
 
     # CORS
-    ALLOWED_ORIGINS: List[str] = Field(
+    ALLOWED_ORIGINS: str | list[str] = Field(
         default=["http://localhost:3000", "http://frontend:3000"]
     )
 
@@ -37,17 +38,29 @@ class Settings(BaseSettings):
     SQL_EXECUTION_TIMEOUT: float = Field(default=5.0)
     MAX_RESULT_ROWS: int = Field(default=100)
 
-    @field_validator("ALLOWED_ORIGINS", mode="before")
-    @classmethod
-    def parse_cors(cls, v: Any) -> List[str]:
-        if isinstance(v, str):
-            return [i.strip() for i in v.split(",")]
-        elif isinstance(v, list):
-            return v
+    def get_allowed_origins(self) -> list[str]:
+        """CORS許可オリジンのリストを返す"""
+        if isinstance(self.ALLOWED_ORIGINS, str):
+            # JSON形式を試す
+            try:
+                parsed = json.loads(self.ALLOWED_ORIGINS)
+                if isinstance(parsed, list):
+                    return parsed
+            except (json.JSONDecodeError, ValueError):
+                # カンマ区切りとして処理
+                return [i.strip() for i in self.ALLOWED_ORIGINS.split(",")]
+        elif isinstance(self.ALLOWED_ORIGINS, list):
+            return self.ALLOWED_ORIGINS
         else:
             return []
 
-    model_config = {"env_file": ".env", "case_sensitive": True}
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=True,
+        # 環境変数から複雑な型を読み込む際にJSON解析をスキップ
+        env_parse_none_str="null",
+        # validatorでカスタム解析を行う
+    )
 
 
 # グローバル設定インスタンス

@@ -54,7 +54,7 @@ skip-magic-trailing-comma = false
 line-ending = "auto"
 
 [tool.black]
-line-length = 79
+line-length = 88  # Ruffと統一
 target-version = ['py311']
 include = '\.pyi?$'
 exclude = '''

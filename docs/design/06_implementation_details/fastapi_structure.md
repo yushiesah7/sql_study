@@ -47,7 +47,7 @@ import logging
 from app.api.routes import api_router
 from app.core.config import settings
 from app.core.exceptions import setup_exception_handlers
-from app.core.db import DatabaseManager
+from app.core.db import Database
 from app.core.llm_client import LLMClient
 
 # ロギング設定
@@ -58,20 +58,20 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # グローバル変数（ライフサイクル管理用）
-db_manager: DatabaseManager = None
+# db はapp.core.dbモジュールでグローバルインスタンスとして定義
 llm_client: LLMClient = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """アプリケーションのライフサイクル管理"""
-    global db_manager, llm_client
+    global llm_client
     
     # 起動時
     logger.info("Starting up...")
     
     # データベース初期化
-    db_manager = DatabaseManager(settings.DATABASE_URL)
-    await db_manager.initialize()
+    from app.core.db import db
+    await db.connect()
     
     # LLMクライアント初期化
     llm_client = LLMClient(
@@ -84,7 +84,7 @@ async def lifespan(app: FastAPI):
     
     # 終了時
     logger.info("Shutting down...")
-    await db_manager.close()
+    await db.disconnect()
     await llm_client.close()
 
 # FastAPIアプリケーション作成
@@ -98,7 +98,7 @@ app = FastAPI(
 # CORS設定
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=settings.get_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -119,9 +119,10 @@ async def root():
 ### 2. app/core/config.py - 設定管理
 
 ```python
-from pydantic_settings import BaseSettings
-from typing import List
-import os
+import json
+from typing import Any, Union
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     """アプリケーション設定"""
@@ -145,15 +146,45 @@ class Settings(BaseSettings):
     LLM_MAX_TOKENS: int = 2000
     
     # CORS
-    ALLOWED_ORIGINS: List[str] = ["http://localhost:3000"]
+    # 注：pydantic_settings v2の制約により、環境変数からリスト型を
+    # 直接読み込む際にJSON解析エラーが発生するため、
+    # Union[str, list[str]]として定義し、メソッドで変換する
+    ALLOWED_ORIGINS: Union[str, list[str]] = Field(
+        default=["http://localhost:3000", "http://frontend:3000"]
+    )
+    
+    def get_allowed_origins(self) -> list[str]:
+        """
+        CORS許可オリジンのリストを返す
+        
+        環境変数からの読み込みフォーマット:
+        - JSON形式: '["http://localhost:3000","http://frontend:3000"]'
+        - カンマ区切り: 'http://localhost:3000,http://frontend:3000'
+        """
+        if isinstance(self.ALLOWED_ORIGINS, str):
+            # JSON形式を試す
+            try:
+                parsed = json.loads(self.ALLOWED_ORIGINS)
+                if isinstance(parsed, list):
+                    return parsed
+            except (json.JSONDecodeError, ValueError):
+                # カンマ区切りとして処理
+                return [i.strip() for i in self.ALLOWED_ORIGINS.split(",")]
+        elif isinstance(self.ALLOWED_ORIGINS, list):
+            return self.ALLOWED_ORIGINS
+        else:
+            return []
     
     # セキュリティ
     SQL_EXECUTION_TIMEOUT: float = 5.0
     MAX_RESULT_ROWS: int = 100
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=True,
+        # 環境変数から複雑な型を読み込む際のJSON解析設定
+        env_parse_none_str="null",
+    )
 
 # シングルトンインスタンス
 settings = Settings()
@@ -165,15 +196,13 @@ settings = Settings()
 from typing import Generator
 from fastapi import Depends
 
-from app.core.db import DatabaseManager
+from app.core.db import db
 from app.core.llm_client import LLMClient
-from app.main import db_manager, llm_client
+from app.main import llm_client
 
-async def get_db() -> DatabaseManager:
-    """データベースマネージャーの依存性注入"""
-    if not db_manager:
-        raise RuntimeError("Database not initialized")
-    return db_manager
+async def get_db():
+    """データベースインスタンスの依存性注入"""
+    return db
 
 async def get_llm() -> LLMClient:
     """LLMクライアントの依存性注入"""
@@ -312,14 +341,14 @@ import asyncio
 from datetime import datetime
 
 from app.core.dependencies import get_db, get_llm
-from app.core.db import DatabaseManager
+from app.core.db import Database
 from app.core.llm_client import LLMClient
 
 router = APIRouter()
 
 @router.get("/health")
 async def health_check(
-    db: DatabaseManager = Depends(get_db),
+    db: Database = Depends(get_db),
     llm: LLMClient = Depends(get_llm)
 ) -> Dict[str, Any]:
     """
@@ -408,20 +437,33 @@ MAX_RESULT_ROWS=100
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Dockerでの起動（Dockerfile更新）
+### Dockerでの起動（Dockerfile）
 ```dockerfile
 FROM python:3.11-slim
 
+# 必要なシステムパッケージをインストール
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-# 依存関係インストール
+# 依存関係を先にコピーしてキャッシュを活用
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# アプリケーションコピー
+# アプリケーションコードをコピー
 COPY ./app ./app
 
-# 起動コマンド
+# 非rootユーザーで実行（セキュリティ対策）
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
+
+# ポート公開
+EXPOSE 8000
+
+# アプリケーション起動
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 

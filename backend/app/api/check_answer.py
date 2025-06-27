@@ -5,15 +5,17 @@
 
 import logging
 import math
-from typing import Dict, Any, List
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException
-from app.schemas import UniversalRequest, UniversalResponse
-from app.core.dependencies import get_llm, get_db_service
-from app.core.validators import validate_sql
-from app.services.llm_service import LLMService
-from app.services.db_service import DatabaseService
-from app.core.exceptions import LLMError, DatabaseError, NotFoundError
+
+from app.core.dependencies import get_db_service, get_llm
 from app.core.error_codes import PROBLEM_NOT_FOUND
+from app.core.exceptions import DatabaseError, LLMError, NotFoundError
+from app.core.validators import validate_sql
+from app.schemas import UniversalRequest, UniversalResponse
+from app.services.db_service import DatabaseService
+from app.services.llm_service import LLMService
 
 logger = logging.getLogger(__name__)
 
@@ -21,10 +23,10 @@ router = APIRouter()
 
 
 def _compare_results(
-    user_result: List[Dict[str, Any]], expected_result: List[Dict[str, Any]]
+    user_result: list[dict[str, Any]], expected_result: list[dict[str, Any]]
 ) -> bool:
     """
-    クエリ結果を比較（カラム順序無視）
+    クエリ結果を比較(カラム順序無視)
 
     Args:
         user_result: ユーザーの実行結果
@@ -49,19 +51,22 @@ def _compare_results(
     if user_columns != expected_columns:
         return False
 
-    # 行の比較（順序を考慮してソート）
+    # 行の比較(順序を考慮してソート)
     def normalize_value(value: Any) -> tuple[str, Any]:
-        """値を正規化（浮動小数点数の比較を考慮）"""
+        """値を正規化(浮動小数点数の比較を考慮)"""
         if isinstance(value, float):
             return ("float", value)
         return ("other", value)
 
-    def normalize_row(row: Dict[str, Any]) -> tuple[tuple[str, tuple[str, Any]], ...]:
+    def normalize_row(row: dict[str, Any]) -> tuple[tuple[str, tuple[str, Any]], ...]:
         return tuple(sorted((k, normalize_value(v)) for k, v in row.items()))
 
-    def rows_equal(row1: tuple[tuple[str, tuple[str, Any]], ...], row2: tuple[tuple[str, tuple[str, Any]], ...]) -> bool:
-        """行同士を比較（浮動小数点数の近似値比較を含む）"""
-        for (k1, (type1, v1)), (k2, (type2, v2)) in zip(row1, row2):
+    def rows_equal(
+        row1: tuple[tuple[str, tuple[str, Any]], ...],
+        row2: tuple[tuple[str, tuple[str, Any]], ...],
+    ) -> bool:
+        """行同士を比較(浮動小数点数の近似値比較を含む)"""
+        for (k1, (type1, v1)), (k2, (type2, v2)) in zip(row1, row2, strict=False):
             if k1 != k2 or type1 != type2:
                 return False
             if type1 == "float":
@@ -78,7 +83,9 @@ def _compare_results(
     if len(user_normalized) != len(expected_normalized):
         return False
 
-    for user_row, expected_row in zip(user_normalized, expected_normalized):
+    for user_row, expected_row in zip(
+        user_normalized, expected_normalized, strict=False
+    ):
         if not rows_equal(user_row, expected_row):
             return False
 
@@ -125,11 +132,11 @@ async def check_answer(
         except (TypeError, ValueError):
             raise HTTPException(
                 status_code=400, detail="problem_idは数値である必要があります"
-            )
+            ) from None
 
         logger.info(f"Checking answer for problem {problem_id}")
 
-        # 1. SQL検証（SELECT文のみ許可）
+        # 1. SQL検証(SELECT文のみ許可)
         is_valid, error_code, error_message = validate_sql(user_sql)
         if not is_valid:
             return UniversalResponse(
@@ -165,7 +172,8 @@ async def check_answer(
                 data={
                     "is_correct": False,
                     "error_message": str(e.detail),
-                    "hint": "SQL構文を確認してください。テーブル名やカラム名に誤りがないか確認しましょう。",
+                    "hint": "SQL構文を確認してください。"
+                    "テーブル名やカラム名に誤りがないか確認しましょう。",
                 },
             )
 
@@ -203,7 +211,8 @@ async def check_answer(
             )
 
         logger.info(
-            f"Answer check completed for problem {problem_id}: {'correct' if is_correct else 'incorrect'}"
+            f"Answer check completed for problem {problem_id}: "
+            f"{'correct' if is_correct else 'incorrect'}"
         )
 
         return UniversalResponse(
@@ -219,7 +228,7 @@ async def check_answer(
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except LLMError as e:
         logger.error(f"LLM error during answer checking: {e}")
@@ -230,7 +239,7 @@ async def check_answer(
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except DatabaseError as e:
         logger.error(f"Database error during answer checking: {e}")
@@ -241,7 +250,7 @@ async def check_answer(
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except Exception as e:
         logger.error(f"Unexpected error during answer checking: {e}")
@@ -252,4 +261,4 @@ async def check_answer(
                 "message": "回答チェックに失敗しました",
                 "detail": str(e),
             },
-        )
+        ) from None

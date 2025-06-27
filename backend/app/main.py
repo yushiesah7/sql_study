@@ -2,20 +2,21 @@
 FastAPIアプリケーションのエントリーポイント
 """
 
+import logging
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+from datetime import UTC, datetime
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from contextlib import asynccontextmanager
-import logging
-from typing import AsyncGenerator
-from datetime import datetime, timezone
 
-from app.core.config import settings
-from app.core.exceptions import AppException
-from app.core.error_response import ErrorResponseBuilder
-from app.schemas import HealthResponse
 from app import __version__
-from app.api import create_tables, generate_problem, check_answer, table_schemas
+from app.api import check_answer, create_tables, generate_problem, table_schemas
+from app.core.config import settings
+from app.core.error_response import ErrorResponseBuilder
+from app.core.exceptions import AppException
+from app.schemas import HealthResponse
 
 # ロガー設定
 logging.basicConfig(
@@ -56,7 +57,7 @@ app = FastAPI(
 # CORS設定
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=settings.get_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -82,7 +83,7 @@ async def app_exception_handler(request: Request, exc: AppException) -> JSONResp
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """汎用例外ハンドラー"""
-    logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
+    logger.error(f"Unhandled exception: {exc!s}", exc_info=True)
     return JSONResponse(
         status_code=500,
         content=ErrorResponseBuilder.build(
@@ -113,7 +114,7 @@ async def health_check() -> HealthResponse:
 
     return HealthResponse(
         status="healthy" if db_healthy and llm_healthy else "unhealthy",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         version=__version__,
         services={
             "database": db_healthy,

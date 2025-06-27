@@ -3,8 +3,8 @@
 LLMに送信するプロンプトを生成する
 """
 
-from typing import Optional, List, Dict, Any
 import json
+from typing import Any
 
 
 class PromptGenerator:
@@ -12,31 +12,31 @@ class PromptGenerator:
 
     @staticmethod
     def create_table_generation_prompt(
-        user_prompt: Optional[str] = None,
-    ) -> List[Dict[str, str]]:
+        user_prompt: str | None = None,
+    ) -> list[dict[str, str]]:
         """
         テーブル作成用プロンプトを生成
 
         Args:
-            user_prompt: ユーザーからの指示（オプション）
+            user_prompt: ユーザーからの指示(オプション)
 
         Returns:
             LLMに送信するメッセージリスト
         """
         system_message = """あなたはSQL学習アプリのためのテーブル設計アシスタントです。
-        
+
 **目的**: 学習者がSQLの練習をするためのテーブルとサンプルデータを作成してください。
 
 **要件**:
 1. 2-4個のテーブルを作成
-2. テーブル間に適切なリレーション（外部キー）を設定
+2. テーブル間に適切なリレーション(外部キー)を設定
 3. 各テーブルに10-50行程度のリアルなサンプルデータを挿入
 4. 学習に適した現実的なシナリオを選択
 
 **出力形式**:
 ```json
 {
-  "theme": "テーマ名（例：社員管理、図書館、ECサイト）",
+  "theme": "テーマ名(例:社員管理、図書館、ECサイト)",
   "description": "テーマの簡単な説明",
   "sql_statements": [
     "CREATE TABLE ...",
@@ -50,15 +50,18 @@ class PromptGenerator:
 - CREATE TABLE文とINSERT文のみ出力
 - PostgreSQL互換のSQL構文を使用
 - データは多様性を持たせ、JOIN、GROUP BY、集計関数の練習に適したもの
-- 日本語のデータを含める（名前、住所等）
+- 日本語のデータを含める(名前、住所等)
 """
 
         if user_prompt:
             user_message = (
-                f"以下の指示に従ってテーブルを作成してください：\n{user_prompt}"
+                f"以下の指示に従ってテーブルを作成してください:\n{user_prompt}"
             )
         else:
-            user_message = "学習に適したテーブルとサンプルデータを作成してください。テーマはランダムに選んでください。"
+            user_message = (
+                "学習に適したテーブルとサンプルデータを作成してください。"
+                "テーマはランダムに選んでください。"
+            )
 
         return [
             {"role": "system", "content": system_message},
@@ -67,14 +70,14 @@ class PromptGenerator:
 
     @staticmethod
     def create_problem_generation_prompt(
-        table_schemas: List[Dict[str, Any]], user_prompt: Optional[str] = None
-    ) -> List[Dict[str, str]]:
+        table_schemas: list[dict[str, Any]], user_prompt: str | None = None
+    ) -> list[dict[str, str]]:
         """
         問題生成用プロンプトを生成
 
         Args:
             table_schemas: テーブルスキーマ情報
-            user_prompt: ユーザーからの指示（オプション）
+            user_prompt: ユーザーからの指示(オプション)
 
         Returns:
             LLMに送信するメッセージリスト
@@ -91,7 +94,7 @@ class PromptGenerator:
 
 **要件**:
 1. 学習者が結果を見てSQLを推測する「逆引き学習」形式
-2. 適切な難易度（初級〜中級）
+2. 適切な難易度(初級〜中級)
 3. 実行結果は3-10行程度
 4. JOIN、GROUP BY、集計関数を適度に含む
 
@@ -104,7 +107,7 @@ class PromptGenerator:
     {{"column1": "value1", "column2": "value2"}},
     ...
   ],
-  "hint": "ヒント文（オプション）"
+  "hint": "ヒント文(オプション)"
 }}
 ```
 
@@ -116,7 +119,7 @@ class PromptGenerator:
 """
 
         if user_prompt:
-            user_message = f"以下の条件で問題を作成してください：\n{user_prompt}"
+            user_message = f"以下の条件で問題を作成してください:\n{user_prompt}"
         else:
             user_message = "適切な難易度のSQL学習問題を作成してください。"
 
@@ -128,10 +131,10 @@ class PromptGenerator:
     @staticmethod
     def create_answer_check_prompt(
         user_sql: str,
-        user_result: List[Dict[str, Any]],
-        expected_result: List[Dict[str, Any]],
-        table_schemas: List[Dict[str, Any]],
-    ) -> List[Dict[str, str]]:
+        user_result: list[dict[str, Any]],
+        expected_result: list[dict[str, Any]],
+        table_schemas: list[dict[str, Any]],
+    ) -> list[dict[str, str]]:
         """
         回答チェック用プロンプトを生成
 
@@ -153,7 +156,7 @@ class PromptGenerator:
 
 **採点基準**:
 1. 実行結果が期待結果と完全一致するか
-2. SQLの記述が適切か（効率性、可読性）
+2. SQLの記述が適切か(効率性、可読性)
 3. 学習者にとって有益なフィードバック
 
 **出力形式**:
@@ -163,13 +166,13 @@ class PromptGenerator:
   "score": 0-100,
   "feedback": "詳細なフィードバック",
   "improvement_suggestions": ["改善提案1", "改善提案2"],
-  "hint": "ヒント（間違っている場合）"
+  "hint": "ヒント(間違っている場合)"
 }}
 ```
 
 **フィードバック指針**:
-- 正解の場合：よい点を褒める
-- 不正解の場合：何が間違っているか具体的に指摘
+- 正解の場合:よい点を褒める
+- 不正解の場合:何が間違っているか具体的に指摘
 - 常に建設的で学習促進的な内容
 - 日本語で回答
 """
@@ -199,7 +202,7 @@ class PromptGenerator:
         ]
 
     @staticmethod
-    def _format_table_schemas(table_schemas: List[Dict[str, Any]]) -> str:
+    def _format_table_schemas(table_schemas: list[dict[str, Any]]) -> str:
         """
         テーブルスキーマ情報を読みやすい形式にフォーマット
 
@@ -210,7 +213,7 @@ class PromptGenerator:
             フォーマット済みのスキーマ情報
         """
         if not table_schemas:
-            return "（テーブル情報なし）"
+            return "(テーブル情報なし)"
 
         formatted_schemas = []
         for table in table_schemas:

@@ -3,10 +3,12 @@ PostgreSQL接続管理
 """
 
 import asyncio
-import asyncpg
-from typing import Optional, List, Dict, Any, AsyncGenerator
-from contextlib import asynccontextmanager
 import logging
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+from typing import Any
+
+import asyncpg
 
 from app.core.config import settings
 from app.core.exceptions import DatabaseError
@@ -18,7 +20,7 @@ class Database:
     """データベース接続管理クラス"""
 
     def __init__(self) -> None:
-        self.pool: Optional[asyncpg.Pool] = None
+        self.pool: asyncpg.Pool | None = None
 
     async def connect(self) -> None:
         """データベース接続プールを作成"""
@@ -38,7 +40,7 @@ class Database:
                 message="データベース接続エラー",
                 error_code="DB_CONNECTION_ERROR",
                 detail=str(e),
-            )
+            ) from None
 
     async def disconnect(self) -> None:
         """データベース接続プールを閉じる"""
@@ -60,8 +62,8 @@ class Database:
             yield connection
 
     async def execute_select(
-        self, query: str, *args: Any, timeout: Optional[float] = None
-    ) -> List[Dict[str, Any]]:
+        self, query: str, *args: Any, timeout: float | None = None
+    ) -> list[dict[str, Any]]:
         """SELECT文を実行"""
         try:
             async with self.acquire() as conn:
@@ -76,21 +78,21 @@ class Database:
                 # 結果を辞書形式に変換
                 return [dict(row) for row in rows]
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             raise DatabaseError(
                 message="SQL実行タイムアウト",
                 error_code="DB_TIMEOUT_ERROR",
                 detail=f"制限時間: {timeout}秒",
-            )
+            ) from None
         except asyncpg.PostgresSyntaxError as e:
             raise DatabaseError(
                 message="SQL構文エラー", error_code="DB_SYNTAX_ERROR", detail=str(e)
-            )
+            ) from None
         except Exception as e:
             logger.error(f"Database query error: {e}")
             raise DatabaseError(
                 message="SQL実行エラー", error_code="DB_EXECUTION_ERROR", detail=str(e)
-            )
+            ) from None
 
     async def execute(self, query: str, *args: Any) -> Any:
         """任意のSQLを実行（CREATE/DROP等）"""
@@ -102,12 +104,12 @@ class Database:
             logger.error(f"Database execute error: {e}")
             raise DatabaseError(
                 message="SQL実行エラー", error_code="DB_EXECUTION_ERROR", detail=str(e)
-            )
+            ) from None
 
-    async def get_table_schemas(self) -> List[Dict[str, Any]]:
+    async def get_table_schemas(self) -> list[dict[str, Any]]:
         """現在のテーブルスキーマ情報を取得"""
         query = """
-        SELECT 
+        SELECT
             t.table_name,
             t.table_type,
             obj_description(pgc.oid, 'pg_class') as table_comment
@@ -123,7 +125,7 @@ class Database:
         # 各テーブルのカラム情報を取得
         for table in tables:
             column_query = """
-            SELECT 
+            SELECT
                 column_name,
                 data_type,
                 is_nullable,
@@ -168,7 +170,7 @@ class Database:
                 message="テーブル削除エラー",
                 error_code="DB_DROP_TABLE_ERROR",
                 detail=str(e),
-            )
+            ) from None
 
     async def check_health(self) -> bool:
         """データベース接続の健全性をチェック"""

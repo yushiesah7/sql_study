@@ -2,12 +2,12 @@
 SQL検証機能のテスト
 """
 
-from app.core.validators import validate_sql
 from app.core.error_codes import (
     VALIDATION_EMPTY_SQL,
-    VALIDATION_SQL_TOO_LONG,
     VALIDATION_INVALID_SQL,
+    VALIDATION_SQL_TOO_LONG,
 )
+from app.core.validators import validate_sql
 
 
 class TestValidateSQL:
@@ -19,7 +19,8 @@ class TestValidateSQL:
             "SELECT * FROM employees",
             "SELECT name, age FROM users WHERE age > 25",
             "SELECT COUNT(*) FROM orders",
-            "SELECT e.name, d.department FROM employees e JOIN departments d ON e.dept_id = d.id",
+            "SELECT e.name, d.department FROM employees e "
+            "JOIN departments d ON e.dept_id = d.id",
             "  SELECT * FROM products  ",  # 前後の空白
         ]
 
@@ -32,8 +33,10 @@ class TestValidateSQL:
     def test_valid_with_statements(self):
         """有効なWITH文のテスト"""
         valid_sqls = [
-            "WITH ranked AS (SELECT *, ROW_NUMBER() OVER(ORDER BY salary) FROM employees) SELECT * FROM ranked",
-            "WITH RECURSIVE factorial AS (SELECT 1 as n, 1 as result) SELECT * FROM factorial",
+            "WITH ranked AS (SELECT *, ROW_NUMBER() OVER(ORDER BY salary) "
+            "FROM employees) SELECT * FROM ranked",
+            "WITH RECURSIVE factorial AS (SELECT 1 as n, 1 as result) "
+            "SELECT * FROM factorial",
         ]
 
         for sql in valid_sqls:
@@ -65,7 +68,7 @@ class TestValidateSQL:
             assert error_code == VALIDATION_EMPTY_SQL
             assert error_message is not None
             assert "入力されていません" in error_message
-        
+
         # Noneの場合は別途テスト
         is_valid, error_code, error_message = validate_sql(None)  # type: ignore
         assert is_valid is False
@@ -161,7 +164,8 @@ class TestValidateSQL:
         ]
 
         safe_but_complex = [
-            "SELECT *, (SELECT password FROM admin WHERE id=1) FROM users",  # サブクエリは許可
+            "SELECT *, (SELECT password FROM admin WHERE id=1) "
+            "FROM users",  # サブクエリは許可
             "SELECT * FROM users UNION SELECT * FROM admin_passwords",  # UNIONは許可
         ]
 

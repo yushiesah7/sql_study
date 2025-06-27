@@ -4,13 +4,15 @@
 """
 
 import logging
+
 from fastapi import APIRouter, Depends, HTTPException
+
+from app.core.dependencies import get_db_service, get_llm
+from app.core.error_codes import NO_TABLES, PROBLEM_GENERATION_ERROR
+from app.core.exceptions import DatabaseError, LLMError, NotFoundError
 from app.schemas import UniversalRequest, UniversalResponse
-from app.core.dependencies import get_llm, get_db_service
-from app.services.llm_service import LLMService
 from app.services.db_service import DatabaseService
-from app.core.exceptions import LLMError, DatabaseError, NotFoundError
-from app.core.error_codes import PROBLEM_GENERATION_ERROR, NO_TABLES
+from app.services.llm_service import LLMService
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +29,7 @@ async def generate_problem(
     SQL学習問題を生成
 
     Args:
-        request: リクエストデータ（prompt: 省略可、最大1000文字）
+        request: リクエストデータ(prompt: 省略可、最大1000文字)
 
     Returns:
         問題ID、実行結果、メタデータ
@@ -36,7 +38,7 @@ async def generate_problem(
         HTTPException: 生成失敗時
     """
     try:
-        # プロンプトの取得（最大1000文字）
+        # プロンプトの取得(最大1000文字)
         prompt = request.prompt
         if prompt and len(prompt) > 1000:
             raise HTTPException(
@@ -56,7 +58,7 @@ async def generate_problem(
             )
 
         # 2. LLMに問題を生成させる
-        # TODO: 前回の正答率から難易度を自動調整（1-10レベル）
+        # TODO: 前回の正答率から難易度を自動調整(1-10レベル)
         problem_info = await llm_service.generate_problem(table_schemas, prompt)
 
         # 3. 生成されたSQLを実行して結果を取得
@@ -71,9 +73,9 @@ async def generate_problem(
                 message="生成された問題のSQLが実行できませんでした",
                 error_code=PROBLEM_GENERATION_ERROR,
                 detail=f"SQL: {correct_sql[:100]}...",
-            )
+            ) from None
 
-        # 結果の行数チェック（3-10行でなければ再生成）
+        # 結果の行数チェック(3-10行でなければ再生成)
         if not (3 <= len(expected_result) <= 10):
             logger.warning(
                 f"Generated problem has {len(expected_result)} rows, outside range 3-10"
@@ -116,7 +118,7 @@ async def generate_problem(
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except LLMError as e:
         logger.error(f"LLM error during problem generation: {e}")
@@ -127,7 +129,7 @@ async def generate_problem(
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except DatabaseError as e:
         logger.error(f"Database error during problem generation: {e}")
@@ -138,7 +140,7 @@ async def generate_problem(
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except Exception as e:
         logger.error(f"Unexpected error during problem generation: {e}")
@@ -149,4 +151,4 @@ async def generate_problem(
                 "message": "問題生成に失敗しました",
                 "detail": str(e),
             },
-        )
+        ) from None

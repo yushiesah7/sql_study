@@ -129,37 +129,39 @@ CREATE TABLE loans (
 
 ### 接続プール設定
 
-```python
-# db.py での実装イメージ
-class DatabaseConfig:
-    # 接続プール設定
-    MIN_CONNECTIONS = 2
-    MAX_CONNECTIONS = 10
-    CONNECTION_TIMEOUT = 5.0  # 秒
-    QUERY_TIMEOUT = 5.0  # 秒（SELECT文の最大実行時間）
-    
-    # ユーザー権限
-    ADMIN_USER = "postgres"  # テーブル作成・削除用
-    READONLY_USER = "student"  # SELECT実行用（将来実装）
-```
+接続プールの設定は環境変数および`Settings`クラスで管理されます：
+
+- `DB_POOL_SIZE`: 最大接続数（デフォルト: 10）
+- `DB_MAX_OVERFLOW`: オーバーフロー接続数（デフォルト: 20）
+- `DB_POOL_TIMEOUT`: プールタイムアウト（デフォルト: 30.0秒）
+- `SQL_EXECUTION_TIMEOUT`: SQL実行タイムアウト（デフォルト: 5.0秒）
 
 ### 接続管理クラス
 
 ```python
-class DatabaseManager:
+class Database:
     """データベース接続とクエリ実行を管理"""
     
-    async def initialize(self):
-        """接続プールの初期化"""
+    async def connect(self):
+        """接続プールを作成"""
         
-    async def execute_admin_query(self, sql: str):
-        """管理者権限でのクエリ実行（DDL用）"""
+    async def disconnect(self):
+        """接続プールを閉じる"""
         
-    async def execute_select(self, sql: str, timeout: float = 5.0):
-        """SELECT文の実行（タイムアウト付き）"""
+    async def execute(self, sql: str, *args):
+        """任意のSQLを実行（CREATE/DROP等）"""
+        
+    async def execute_select(self, query: str, *args, timeout: Optional[float] = None):
+        """SELECT文を実行（タイムアウト付き）"""
         
     async def get_table_schemas(self):
-        """現在のテーブル構造を取得"""
+        """現在のテーブルスキーマ情報を取得"""
+        
+    async def drop_all_tables(self):
+        """全てのテーブルを削除（開発用）"""
+        
+    async def check_health(self) -> bool:
+        """データベース接続の健全性をチェック"""
 ```
 
 ## セキュリティ設計

@@ -132,6 +132,20 @@ docker-compose exec backend bash
 
 # 依存関係の更新
 docker-compose exec backend pip install -r requirements.txt
+
+# Linter/Formatter実行（バックエンド）
+docker-compose -f docker-compose.dev.yml run --rm backend ruff check /app
+docker-compose -f docker-compose.dev.yml run --rm backend ruff format /app
+docker-compose -f docker-compose.dev.yml run --rm backend mypy /app
+
+# テスト実行
+docker-compose -f docker-compose.dev.yml run --rm backend pytest
+
+# フロントエンドLinter/Formatter
+cd frontend
+npm run lint
+npm run prettier:check
+npm run format  # ESLint + Prettier自動修正
 ```
 
 ### トラブルシューティング

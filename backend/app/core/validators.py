@@ -3,11 +3,11 @@ SQL検証関数
 """
 
 import re
-from typing import Tuple, Optional
+
 from .error_codes import (
     VALIDATION_EMPTY_SQL,
-    VALIDATION_SQL_TOO_LONG,
     VALIDATION_INVALID_SQL,
+    VALIDATION_SQL_TOO_LONG,
 )
 
 # 危険なSQL文のパターン
@@ -19,13 +19,13 @@ DANGEROUS_PATTERNS = [
 
 # 許可するSQL文のパターン
 ALLOWED_PATTERNS = [
-    r"^\s*SELECT(\s+|$)",  # SELECT文（後に何かがあるか、文末）
+    r"^\s*SELECT(\s+|$)",  # SELECT文(後に何かがあるか、文末)
     r"^\s*WITH\s+.+\s+SELECT\s+",
     r"^\s*\(\s*SELECT\s+",  # サブクエリ
 ]
 
 
-def validate_sql(sql: str) -> Tuple[bool, Optional[str], Optional[str]]:
+def validate_sql(sql: str) -> tuple[bool, str | None, str | None]:
     """
     SQLの安全性を検証
 
@@ -39,7 +39,7 @@ def validate_sql(sql: str) -> Tuple[bool, Optional[str], Optional[str]]:
 
     # 長さチェック
     if len(sql) > 5000:
-        return (False, VALIDATION_SQL_TOO_LONG, "SQLが長すぎます（最大5000文字）")
+        return (False, VALIDATION_SQL_TOO_LONG, "SQLが長すぎます(最大5000文字)")
 
     # 危険なパターンチェック
     for pattern in DANGEROUS_PATTERNS:

@@ -2,7 +2,7 @@
 カスタム例外クラス定義
 """
 
-from typing import Optional, Dict, Any
+from typing import Any
 
 
 class AppException(Exception):
@@ -13,8 +13,8 @@ class AppException(Exception):
         message: str,
         error_code: str,
         status_code: int = 500,
-        detail: Optional[str] = None,
-        data: Optional[Dict[str, Any]] = None,
+        detail: str | None = None,
+        data: dict[str, Any] | None = None,
     ):
         self.message = message
         self.error_code = error_code
@@ -31,7 +31,7 @@ class ValidationError(AppException):
         self,
         message: str,
         error_code: str = "VALIDATION_ERROR",
-        detail: Optional[str] = None,
+        detail: str | None = None,
     ):
         super().__init__(
             message=message, error_code=error_code, status_code=400, detail=detail
@@ -42,7 +42,7 @@ class NotFoundError(AppException):
     """リソース未検出エラー"""
 
     def __init__(
-        self, message: str, error_code: str = "NOT_FOUND", detail: Optional[str] = None
+        self, message: str, error_code: str = "NOT_FOUND", detail: str | None = None
     ):
         super().__init__(
             message=message, error_code=error_code, status_code=404, detail=detail
@@ -56,7 +56,7 @@ class DatabaseError(AppException):
         self,
         message: str,
         error_code: str = "DATABASE_ERROR",
-        detail: Optional[str] = None,
+        detail: str | None = None,
     ):
         super().__init__(
             message=message, error_code=error_code, status_code=500, detail=detail
@@ -70,7 +70,7 @@ class LLMError(AppException):
         self,
         message: str,
         error_code: str = "LLM_ERROR",
-        detail: Optional[str] = None,
+        detail: str | None = None,
         status_code: int = 500,
     ):
         super().__init__(
