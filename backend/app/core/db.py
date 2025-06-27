@@ -4,7 +4,7 @@ PostgreSQL接続管理
 
 import asyncio
 import asyncpg
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, AsyncGenerator
 from contextlib import asynccontextmanager
 import logging
 
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class Database:
     """データベース接続管理クラス"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.pool: Optional[asyncpg.Pool] = None
 
     async def connect(self) -> None:
@@ -47,7 +47,7 @@ class Database:
             logger.info("Database connection pool closed")
 
     @asynccontextmanager
-    async def acquire(self):
+    async def acquire(self) -> AsyncGenerator[asyncpg.Connection, None]:
         """接続をコンテキストマネージャーとして取得"""
         if not self.pool:
             raise DatabaseError(
@@ -60,7 +60,7 @@ class Database:
             yield connection
 
     async def execute_select(
-        self, query: str, *args, timeout: Optional[float] = None
+        self, query: str, *args: Any, timeout: Optional[float] = None
     ) -> List[Dict[str, Any]]:
         """SELECT文を実行"""
         try:
@@ -92,7 +92,7 @@ class Database:
                 message="SQL実行エラー", error_code="DB_EXECUTION_ERROR", detail=str(e)
             )
 
-    async def execute(self, query: str, *args) -> Any:
+    async def execute(self, query: str, *args: Any) -> Any:
         """任意のSQLを実行（CREATE/DROP等）"""
         try:
             async with self.acquire() as conn:

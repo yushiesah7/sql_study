@@ -172,7 +172,7 @@ class TestApplicationLifecycle:
     def test_middleware_setup(self):
         """ミドルウェア設定のテスト"""
         # CORSミドルウェアが正しく設定されているかテスト
-        middlewares = [middleware.cls.__name__ for middleware in app.user_middleware]
+        middlewares = [middleware.cls.__name__ for middleware in app.user_middleware]  # type: ignore
         assert "CORSMiddleware" in middlewares
 
     def test_exception_handlers_registered(self):

@@ -201,7 +201,8 @@ class LLMService:
                 # JSONブロックがない場合は全体をJSONとして扱う
                 json_text = content
 
-            return json.loads(json_text)
+            parsed_json: Dict[str, Any] = json.loads(json_text)
+            return parsed_json
 
         except (json.JSONDecodeError, ValueError) as e:
             logger.error(f"JSON parse error: {e}. Content: {content[:200]}...")

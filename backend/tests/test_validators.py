@@ -57,13 +57,21 @@ class TestValidateSQL:
 
     def test_empty_sql(self):
         """空のSQLのテスト"""
-        empty_sqls = ["", "   ", "\t\n", None]
+        empty_sqls = ["", "   ", "\t\n"]
 
         for sql in empty_sqls:
             is_valid, error_code, error_message = validate_sql(sql)
             assert is_valid is False
             assert error_code == VALIDATION_EMPTY_SQL
+            assert error_message is not None
             assert "入力されていません" in error_message
+        
+        # Noneの場合は別途テスト
+        is_valid, error_code, error_message = validate_sql(None)  # type: ignore
+        assert is_valid is False
+        assert error_code == VALIDATION_EMPTY_SQL
+        assert error_message is not None
+        assert "入力されていません" in error_message
 
     def test_sql_too_long(self):
         """SQLが長すぎる場合のテスト"""
@@ -76,6 +84,7 @@ class TestValidateSQL:
         is_valid, error_code, error_message = validate_sql(long_sql)
         assert is_valid is False
         assert error_code == VALIDATION_SQL_TOO_LONG
+        assert error_message is not None
         assert "長すぎます" in error_message
 
     def test_dangerous_statements(self):
@@ -98,6 +107,7 @@ class TestValidateSQL:
             is_valid, error_code, error_message = validate_sql(sql)
             assert is_valid is False, f"Dangerous SQL should be invalid: {sql}"
             assert error_code == VALIDATION_INVALID_SQL
+            assert error_message is not None
             assert "実行できません" in error_message
 
     def test_multiple_statements(self):
@@ -140,6 +150,7 @@ class TestValidateSQL:
             is_valid, error_code, error_message = validate_sql(sql)
             assert is_valid is False, f"Non-SELECT statement should be invalid: {sql}"
             assert error_code == VALIDATION_INVALID_SQL
+            assert error_message is not None
             assert "SELECT文のみ実行可能です" in error_message
 
     def test_sql_injection_attempts(self):

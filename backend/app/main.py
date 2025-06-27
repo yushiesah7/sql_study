@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import logging
+from typing import AsyncGenerator
 from datetime import datetime, timezone
 
 from app.core.config import settings
@@ -25,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """アプリケーションライフサイクル管理"""
     # 起動時処理
     logger.info(f"Starting {settings.APP_NAME} v{__version__}")
@@ -64,7 +65,7 @@ app.add_middleware(
 
 # グローバルエラーハンドラー
 @app.exception_handler(AppException)
-async def app_exception_handler(request: Request, exc: AppException):
+async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
     """アプリケーション例外ハンドラー"""
     logger.error(f"AppException: {exc.error_code} - {exc.message}", exc_info=True)
     return JSONResponse(
@@ -79,7 +80,7 @@ async def app_exception_handler(request: Request, exc: AppException):
 
 
 @app.exception_handler(Exception)
-async def general_exception_handler(request: Request, exc: Exception):
+async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """汎用例外ハンドラー"""
     logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
     return JSONResponse(
@@ -94,7 +95,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 # ヘルスチェックエンドポイント
 @app.get("/api/health", response_model=HealthResponse)
-async def health_check():
+async def health_check() -> HealthResponse:
     """ヘルスチェック"""
     from app.core.db import db
     from app.core.dependencies import get_llm

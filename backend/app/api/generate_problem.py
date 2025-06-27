@@ -22,7 +22,7 @@ async def generate_problem(
     request: UniversalRequest,
     llm_service: LLMService = Depends(get_llm),
     db_service: DatabaseService = Depends(get_db_service),
-):
+) -> UniversalResponse:
     """
     SQL学習問題を生成
 

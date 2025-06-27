@@ -50,16 +50,16 @@ def _compare_results(
         return False
 
     # 行の比較（順序を考慮してソート）
-    def normalize_value(value):
+    def normalize_value(value: Any) -> tuple[str, Any]:
         """値を正規化（浮動小数点数の比較を考慮）"""
         if isinstance(value, float):
             return ("float", value)
         return ("other", value)
 
-    def normalize_row(row):
+    def normalize_row(row: Dict[str, Any]) -> tuple[tuple[str, tuple[str, Any]], ...]:
         return tuple(sorted((k, normalize_value(v)) for k, v in row.items()))
 
-    def rows_equal(row1, row2):
+    def rows_equal(row1: tuple[tuple[str, tuple[str, Any]], ...], row2: tuple[tuple[str, tuple[str, Any]], ...]) -> bool:
         """行同士を比較（浮動小数点数の近似値比較を含む）"""
         for (k1, (type1, v1)), (k2, (type2, v2)) in zip(row1, row2):
             if k1 != k2 or type1 != type2:
@@ -90,7 +90,7 @@ async def check_answer(
     request: UniversalRequest,
     llm_service: LLMService = Depends(get_llm),
     db_service: DatabaseService = Depends(get_db_service),
-):
+) -> UniversalResponse:
     """
     ユーザーのSQL回答をチェック
 
