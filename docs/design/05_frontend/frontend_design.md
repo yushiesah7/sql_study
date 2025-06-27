@@ -19,7 +19,7 @@
 | Next.js 14 | App Router、TypeScript標準対応 |
 | TypeScript | 型安全性 |
 | Tailwind CSS | 高速なスタイリング |
-| axios | シンプルなAPI通信 |
+| fetch API | ブラウザ標準のAPI通信 |
 
 ### 不採用の技術とその理由
 - Redux/Zustand: 状態管理が最小限のため不要
@@ -37,10 +37,10 @@ frontend/
 │   │   └── globals.css      # グローバルスタイル
 │   ├── components/
 │   │   ├── Button.tsx       # 共通ボタン
-│   │   ├── ResultTable.tsx  # 結果表示テーブル
+│   │   ├── TableDisplay.tsx # 結果表示テーブル
 │   │   ├── SqlEditor.tsx    # SQL入力エリア
 │   │   └── SchemaViewer.tsx # テーブル構造表示
-│   ├── lib/
+│   ├── utils/
 │   │   └── api.ts          # API通信関数
 │   └── types/
 │       └── index.ts        # TypeScript型定義
@@ -112,58 +112,98 @@ interface PageState {
 
 ## API通信設計
 
-### lib/api.ts
+### utils/api.ts
 ```typescript
-import axios from 'axios';
+const API_BASE_URL =
+  process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:8001/api';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 30000, // 30秒
-});
-
-// エラーハンドリング
-api.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response?.data?.error) {
-      throw new Error(error.response.data.error.message);
-    }
-    throw new Error('通信エラーが発生しました');
+class ApiError extends Error {
+  constructor(
+    message: string,
+    public statusCode: number,
+    public errorResponse?: any,
+  ) {
+    super(message);
+    this.name = 'ApiError';
   }
-);
+}
 
-export const sqlApi = {
-  // テーブル作成
-  createTables: async (prompt?: string) => {
-    const { data } = await api.post('/api/create-tables', { prompt });
-    return data;
-  },
-  
-  // スキーマ取得
-  getSchemas: async () => {
-    const { data } = await api.get('/api/table-schemas');
-    return data;
-  },
-  
-  // 問題生成
-  generateProblem: async (prompt?: string) => {
-    const { data } = await api.post('/api/generate-problem', { prompt });
-    return data;
-  },
-  
-  // 回答チェック
-  checkAnswer: async (problemId: number, userSql: string) => {
-    const { data } = await api.post('/api/check-answer', {
-      context: { problem_id: problemId, user_sql: userSql }
+async function handleResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    let errorData: any;
+    try {
+      errorData = await response.json();
+    } catch {
+      // JSONパースに失敗した場合はそのまま進む
+    }
+
+    throw new ApiError(
+      errorData?.error?.message ?? `HTTP Error: ${response.status}`,
+      response.status,
+      errorData,
+    );
+  }
+
+  // 204 No Contentなど、レスポンスボディがない場合の処理
+  if (
+    response.status === 204 ||
+    response.headers.get('content-length') === '0'
+  ) {
+    return undefined as unknown as T;
+  }
+
+  return response.json() as Promise<T>;
+}
+
+export const api = {
+  async createTables(request = {}) {
+    const response = await fetch(`${API_BASE_URL}/create-tables`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
     });
-    return data;
+
+    return handleResponse(response);
+  },
+
+  async generateProblem(request = {}) {
+    const response = await fetch(`${API_BASE_URL}/generate-problem`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+    });
+
+    return handleResponse(response);
+  },
+
+  async checkAnswer(request) {
+    const response = await fetch(`${API_BASE_URL}/check-answer`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+    });
+
+    return handleResponse(response);
+  },
+
+  async getTableSchemas() {
+    const response = await fetch(`${API_BASE_URL}/table-schemas`);
+    return handleResponse(response);
+  },
+
+  async getHealth() {
+    const response = await fetch(`${API_BASE_URL}/health`);
+    return handleResponse(response);
   },
 };
+
+export { ApiError };
 ```
 
 ## TypeScript型定義
@@ -293,7 +333,6 @@ const ResultTable = React.memo(({ data }) => {
     "next": "14.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "axios": "^1.6.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
@@ -339,8 +378,37 @@ MVP段階では手動テストのみ：
    - 全体の動作確認
    - スタイリング調整
 
+## Docker設定
+
+### Dockerfile
+```dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+# 依存関係をコピーしてインストール
+COPY package*.json ./
+RUN npm ci --only=production
+
+# アプリケーションコードをコピー
+COPY . .
+
+# Next.jsをビルド
+RUN npm run build
+
+# ポート3000を公開
+EXPOSE 3000
+
+# アプリケーション実行
+CMD ["npm", "start"]
+```
+
+### docker-composeでの設定
+本番環境ではイメージビルド、開発環境ではボリュームマウントでホットリロードを実現しています。
+
 ## 変更履歴
 
 | 日付 | バージョン | 変更内容 | 変更者 |
 |-----|-----------|---------|--------|
 | 2024-12-22 | 1.0.0 | 初版作成 | - |
+| 2024-12-27 | 1.1.0 | axios→fetch API、ディレクトリ構造更新、Docker設定追加 | - |

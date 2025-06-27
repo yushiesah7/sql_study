@@ -2,6 +2,7 @@
 アプリケーション設定
 """
 
+import json
 from typing import List, Any
 from pydantic_settings import BaseSettings
 from pydantic import Field, field_validator
@@ -41,7 +42,14 @@ class Settings(BaseSettings):
     @classmethod
     def parse_cors(cls, v: Any) -> List[str]:
         if isinstance(v, str):
-            return [i.strip() for i in v.split(",")]
+            # まずJSON形式を試す
+            try:
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return parsed
+            except (json.JSONDecodeError, ValueError):
+                # JSON形式でない場合は、カンマ区切りとして処理
+                return [i.strip() for i in v.split(",")]
         elif isinstance(v, list):
             return v
         else:

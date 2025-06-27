@@ -9,7 +9,7 @@
 | コンポーネント | 用途 | Props |
 |-------------|------|-------|
 | Button | 汎用ボタン | onClick, children, variant, loading |
-| ResultTable | 結果表示テーブル | data, columns |
+| TableDisplay | 結果表示テーブル | data, title, className, maxRows |
 | SqlEditor | SQL入力エリア | value, onChange, onExecute |
 | SchemaViewer | テーブル構造表示 | schemas |
 | LoadingSpinner | ローディング表示 | size |
@@ -28,11 +28,11 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/Button';
-import { ResultTable } from '@/components/ResultTable';
+import { TableDisplay } from '@/components/TableDisplay';
 import { SqlEditor } from '@/components/SqlEditor';
 import { SchemaViewer } from '@/components/SchemaViewer';
 import { ErrorMessage } from '@/components/ErrorMessage';
-import { sqlApi } from '@/lib/api';
+import { api } from '@/utils/api';
 import type { 
   TableSchema, 
   ProblemData, 
@@ -53,9 +53,9 @@ export default function Home() {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await sqlApi.createTables();
+      const result = await api.createTables();
       if (result.success) {
-        const schemasData = await sqlApi.getSchemas();
+        const schemasData = await api.getTableSchemas();
         setSchemas(schemasData.schemas);
         // リセット
         setCurrentProblem(null);
@@ -76,7 +76,7 @@ export default function Home() {
     setIsLoading(true);
     setError(null);
     try {
-      const problem = await sqlApi.generateProblem();
+      const problem = await api.generateProblem();
       setCurrentProblem({
         ...problem,
         displayColumns: problem.column_names || Object.keys(problem.result[0] || {}),
@@ -98,7 +98,7 @@ export default function Home() {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await sqlApi.checkAnswer(currentProblem.problem_id, userSql);
+      const result = await api.checkAnswer({ problem_id: currentProblem.problem_id, user_sql: userSql });
       setFeedback({
         ...result,
         timestamp: new Date()
@@ -157,9 +157,9 @@ export default function Home() {
             <h2 className="text-xl font-semibold mb-4">
               期待される結果（{currentProblem.row_count}行）
             </h2>
-            <ResultTable 
+            <TableDisplay 
               data={currentProblem.displayRows}
-              columns={currentProblem.displayColumns}
+              title={`期待される結果（${currentProblem.row_count}行）`}
             />
           </div>
         )}
@@ -210,9 +210,9 @@ export default function Home() {
             {!feedback.is_correct && feedback.user_result && (
               <div className="mt-4">
                 <h3 className="font-medium mb-2">あなたの結果:</h3>
-                <ResultTable 
+                <TableDisplay 
                   data={feedback.user_result}
-                  columns={Object.keys(feedback.user_result[0] || {})}
+                  title="あなたの結果"
                 />
               </div>
             )}
@@ -278,73 +278,93 @@ export const Button: FC<ButtonProps> = ({
 
 ---
 
-## 3. ResultTable コンポーネント
+## 3. TableDisplay コンポーネント
 
 ### 設計
 SQL実行結果を表示するテーブルコンポーネント
 
-### 実装例 (components/ResultTable.tsx)
+### 実装例 (components/TableDisplay.tsx)
 ```tsx
-import { FC } from 'react';
+import React from 'react';
+import { clsx } from 'clsx';
 
-interface ResultTableProps {
-  data: Array<Record<string, any>>;
-  columns?: string[];
+interface TableDisplayProps {
+  data: Record<string, any>[];
+  title?: string;
+  className?: string;
+  maxRows?: number;
 }
 
-export const ResultTable: FC<ResultTableProps> = ({ data, columns }) => {
+export const TableDisplay: React.FC<TableDisplayProps> = ({
+  data,
+  title,
+  className,
+  maxRows = 100,
+}) => {
   if (!data || data.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
-        データがありません
+      <div className={clsx('card text-center text-gray-500', className)}>
+        <p>データがありません</p>
       </div>
     );
   }
 
-  // カラム名の決定
-  const displayColumns = columns || Object.keys(data[0]);
+  const columns = Array.from(new Set(data.flatMap((row) => Object.keys(row))));
+  const displayData = data.slice(0, maxRows);
+  const hasMoreRows = data.length > maxRows;
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full bg-white border border-gray-200">
-        <thead>
-          <tr className="bg-gray-50">
-            {displayColumns.map((col) => (
-              <th
-                key={col}
-                className="px-4 py-2 border-b border-gray-200 text-left text-sm font-medium text-gray-700"
-              >
-                {col}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row, idx) => (
-            <tr key={idx} className="hover:bg-gray-50">
-              {displayColumns.map((col) => (
-                <td
-                  key={col}
-                  className="px-4 py-2 border-b border-gray-200 text-sm text-gray-900"
-                >
-                  {formatValue(row[col])}
-                </td>
+    <div className={clsx('card', className)}>
+      {title && (
+        <h3 className="mb-4 text-lg font-medium text-gray-900">{title}</h3>
+      )}
+
+      <div className="overflow-x-auto">
+        <table className="table">
+          <thead>
+            <tr>
+              {columns.map((column) => (
+                <th key={column} className="px-4 py-2">
+                  {column}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {displayData.map((row, index) => (
+              <tr
+                key={index}
+                className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
+              >
+                {columns.map((column) => (
+                  <td key={column} className="px-4 py-2">
+                    <span className="text-sm">
+                      {row[column] === null || row[column] === undefined ? (
+                        <span className="italic text-gray-400">NULL</span>
+                      ) : (
+                        String(row[column])
+                      )}
+                    </span>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {hasMoreRows && (
+        <div className="mt-4 text-center text-sm text-gray-500">
+          {data.length}行中{maxRows}行を表示
+        </div>
+      )}
+
+      <div className="mt-2 text-right text-xs text-gray-400">
+        {data.length}行 × {columns.length}列
+      </div>
     </div>
   );
 };
-
-// 値のフォーマット
-function formatValue(value: any): string {
-  if (value === null) return 'NULL';
-  if (value === undefined) return '';
-  if (typeof value === 'object') return JSON.stringify(value);
-  return String(value);
-}
 ```
 
 ---
