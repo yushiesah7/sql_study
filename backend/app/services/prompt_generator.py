@@ -58,7 +58,10 @@ class PromptGenerator:
                 f"以下の指示に従ってテーブルを作成してください:\n{user_prompt}"
             )
         else:
-            user_message = "学習に適したテーブルとサンプルデータを作成してください。テーマはランダムに選んでください。"
+            user_message = (
+                "学習に適したテーブルとサンプルデータを作成してください。"
+                "テーマはランダムに選んでください。"
+            )
 
         return [
             {"role": "system", "content": system_message},

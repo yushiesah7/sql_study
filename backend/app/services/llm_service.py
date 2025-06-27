@@ -62,7 +62,7 @@ class LLMService:
                 message="テーブル生成に失敗しました",
                 error_code=LLM_GENERATION_FAILED,
                 detail=str(e),
-            )
+            ) from None
 
     async def generate_problem(
         self, table_schemas: list[dict[str, Any]], user_prompt: str | None = None
@@ -100,7 +100,8 @@ class LLMService:
             self._validate_problem_generation_result(result)
 
             logger.info(
-                f"Generated problem with difficulty: {result.get('difficulty', 'Unknown')}"
+                f"Generated problem with difficulty: "
+                f"{result.get('difficulty', 'Unknown')}"
             )
             return result
 
@@ -112,7 +113,7 @@ class LLMService:
                 message="問題生成に失敗しました",
                 error_code=LLM_GENERATION_FAILED,
                 detail=str(e),
-            )
+            ) from None
 
     async def check_answer(
         self,
@@ -167,7 +168,7 @@ class LLMService:
                 message="回答チェックに失敗しました",
                 error_code=LLM_GENERATION_FAILED,
                 detail=str(e),
-            )
+            ) from None
 
     def _parse_json_response(self, content: str) -> dict[str, Any]:
         """
@@ -208,7 +209,7 @@ class LLMService:
                 message="LLM応答の解析に失敗しました",
                 error_code=LLM_INVALID_RESPONSE,
                 detail=f"JSONフォーマットエラー: {e!s}",
-            )
+            ) from None
 
     def _validate_table_generation_result(self, result: dict[str, Any]) -> None:
         """テーブル生成結果の検証"""

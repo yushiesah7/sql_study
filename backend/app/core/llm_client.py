@@ -75,7 +75,8 @@ class LocalAIClient:
                         return self._validate_response(result)
 
                     logger.warning(
-                        f"LLM API error (attempt {attempt + 1}): {response.status_code} - {response.text}"
+                        f"LLM API error (attempt {attempt + 1}): "
+                        f"{response.status_code} - {response.text}"
                     )
                     if attempt == self.max_retries - 1:
                         raise LLMError(
@@ -91,7 +92,7 @@ class LocalAIClient:
                         message="LLM API タイムアウト",
                         error_code=LLM_TIMEOUT,
                         detail=f"制限時間: {self.timeout}秒",
-                    )
+                    ) from None
 
             except httpx.ConnectError:
                 logger.warning(f"LLM connection error (attempt {attempt + 1})")
@@ -100,7 +101,7 @@ class LocalAIClient:
                         message="LLM接続エラー",
                         error_code=LLM_CONNECTION,
                         detail="LocalAIサービスに接続できません",
-                    )
+                    ) from None
 
             except Exception as e:
                 logger.error(f"Unexpected LLM error (attempt {attempt + 1}): {e}")
@@ -109,7 +110,7 @@ class LocalAIClient:
                         message="LLM処理エラー",
                         error_code=LLM_GENERATION_FAILED,
                         detail=str(e),
-                    )
+                    ) from None
 
             # リトライ前に少し待機
             if attempt < self.max_retries - 1:
@@ -159,7 +160,7 @@ class LocalAIClient:
                 message="LLM応答が不正です",
                 error_code=LLM_INVALID_RESPONSE,
                 detail=f"期待される形式: OpenAI chat completions. エラー: {e!s}",
-            )
+            ) from None
 
     def extract_content(self, response: dict[str, Any]) -> str:
         """

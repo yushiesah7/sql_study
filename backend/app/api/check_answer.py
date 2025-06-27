@@ -228,7 +228,7 @@ async def check_answer(
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except LLMError as e:
         logger.error(f"LLM error during answer checking: {e}")
@@ -239,7 +239,7 @@ async def check_answer(
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except DatabaseError as e:
         logger.error(f"Database error during answer checking: {e}")
@@ -250,7 +250,7 @@ async def check_answer(
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except Exception as e:
         logger.error(f"Unexpected error during answer checking: {e}")
@@ -261,4 +261,4 @@ async def check_answer(
                 "message": "回答チェックに失敗しました",
                 "detail": str(e),
             },
-        )
+        ) from None

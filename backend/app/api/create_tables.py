@@ -29,7 +29,7 @@ async def create_tables(
     学習用テーブルとサンプルデータを作成
 
     Args:
-        request: リクエストデータ（prompt: 省略可、最大1000文字）
+        request: リクエストデータ(prompt: 省略可、最大1000文字)
 
     Returns:
         作成結果とテーマ情報
@@ -38,7 +38,7 @@ async def create_tables(
         HTTPException: 作成失敗時
     """
     try:
-        # プロンプトの取得（最大1000文字）
+        # プロンプトの取得(最大1000文字)
         prompt = request.prompt
         if prompt and len(prompt) > 1000:
             raise HTTPException(
@@ -62,7 +62,7 @@ async def create_tables(
         sql_statements = table_info["sql_statements"]
         await db_service.execute_sql_statements(sql_statements)
 
-        # 5. セッション状態を更新（今後実装）
+        # 5. セッション状態を更新(今後実装)
         # TODO: セッション管理機能の実装
 
         theme = table_info.get("theme", "Unknown")
@@ -94,7 +94,7 @@ async def create_tables(
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except DatabaseError as e:
         logger.error(f"Database error during table creation: {e}")
@@ -105,7 +105,7 @@ async def create_tables(
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except Exception as e:
         logger.error(f"Unexpected error during table creation: {e}")
@@ -116,4 +116,4 @@ async def create_tables(
                 "message": "テーブル作成に失敗しました",
                 "detail": str(e),
             },
-        )
+        ) from None

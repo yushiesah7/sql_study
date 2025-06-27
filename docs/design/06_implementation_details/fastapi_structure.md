@@ -98,7 +98,7 @@ app = FastAPI(
 # CORS設定
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=settings.get_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -120,9 +120,9 @@ async def root():
 
 ```python
 import json
-from typing import List, Any
-from pydantic_settings import BaseSettings
-from pydantic import Field, field_validator
+from typing import Any, Union
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     """アプリケーション設定"""
@@ -146,30 +146,32 @@ class Settings(BaseSettings):
     LLM_MAX_TOKENS: int = 2000
     
     # CORS
-    ALLOWED_ORIGINS: List[str] = Field(
+    # 注：pydantic_settings v2の制約により、環境変数からリスト型を
+    # 直接読み込む際にJSON解析エラーが発生するため、
+    # Union[str, list[str]]として定義し、メソッドで変換する
+    ALLOWED_ORIGINS: Union[str, list[str]] = Field(
         default=["http://localhost:3000", "http://frontend:3000"]
     )
     
-    @field_validator("ALLOWED_ORIGINS", mode="before")
-    @classmethod
-    def parse_cors(cls, v: Any) -> List[str]:
+    def get_allowed_origins(self) -> list[str]:
         """
-        CORS設定をパース
+        CORS許可オリジンのリストを返す
+        
+        環境変数からの読み込みフォーマット:
         - JSON形式: '["http://localhost:3000","http://frontend:3000"]'
         - カンマ区切り: 'http://localhost:3000,http://frontend:3000'
-        - リスト形式: ["http://localhost:3000", "http://frontend:3000"]
         """
-        if isinstance(v, str):
-            # まずJSON形式を試す
+        if isinstance(self.ALLOWED_ORIGINS, str):
+            # JSON形式を試す
             try:
-                parsed = json.loads(v)
+                parsed = json.loads(self.ALLOWED_ORIGINS)
                 if isinstance(parsed, list):
                     return parsed
             except (json.JSONDecodeError, ValueError):
-                # JSON形式でない場合は、カンマ区切りとして処理
-                return [i.strip() for i in v.split(",")]
-        elif isinstance(v, list):
-            return v
+                # カンマ区切りとして処理
+                return [i.strip() for i in self.ALLOWED_ORIGINS.split(",")]
+        elif isinstance(self.ALLOWED_ORIGINS, list):
+            return self.ALLOWED_ORIGINS
         else:
             return []
     
@@ -177,7 +179,12 @@ class Settings(BaseSettings):
     SQL_EXECUTION_TIMEOUT: float = 5.0
     MAX_RESULT_ROWS: int = 100
     
-    model_config = {"env_file": ".env", "case_sensitive": True}
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=True,
+        # 環境変数から複雑な型を読み込む際のJSON解析設定
+        env_parse_none_str="null",
+    )
 
 # シングルトンインスタンス
 settings = Settings()

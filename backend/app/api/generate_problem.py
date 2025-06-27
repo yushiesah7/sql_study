@@ -73,7 +73,7 @@ async def generate_problem(
                 message="生成された問題のSQLが実行できませんでした",
                 error_code=PROBLEM_GENERATION_ERROR,
                 detail=f"SQL: {correct_sql[:100]}...",
-            )
+            ) from None
 
         # 結果の行数チェック(3-10行でなければ再生成)
         if not (3 <= len(expected_result) <= 10):
@@ -118,7 +118,7 @@ async def generate_problem(
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except LLMError as e:
         logger.error(f"LLM error during problem generation: {e}")
@@ -129,7 +129,7 @@ async def generate_problem(
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except DatabaseError as e:
         logger.error(f"Database error during problem generation: {e}")
@@ -140,7 +140,7 @@ async def generate_problem(
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except Exception as e:
         logger.error(f"Unexpected error during problem generation: {e}")
@@ -151,4 +151,4 @@ async def generate_problem(
                 "message": "問題生成に失敗しました",
                 "detail": str(e),
             },
-        )
+        ) from None

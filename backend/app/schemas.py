@@ -30,16 +30,16 @@ class CreateTablesResponse(BaseModel):
     theme: str = Field(..., description="AIが選択したテーマ")
     message: str | None = Field(None, description="ユーザー向けメッセージ")
     tables: list[str] | None = Field(
-        None, description="作成したテーブル名リスト（将来実装）"
+        None, description="作成したテーブル名リスト(将来実装)"
     )
-    details: dict[str, Any] | None = Field(None, description="詳細情報（将来実装）")
+    details: dict[str, Any] | None = Field(None, description="詳細情報(将来実装)")
 
 
 class GenerateProblemResponse(BaseModel):
     """問題生成レスポンス"""
 
     problem_id: int = Field(..., description="問題ID")
-    difficulty: str = Field(..., description="難易度（easy/medium/hard）")
+    difficulty: str = Field(..., description="難易度(easy/medium/hard)")
     expected_result: list[dict[str, Any]] = Field(..., description="期待される実行結果")
     hint: str | None = Field(None, description="ヒント")
     created_at: datetime = Field(..., description="作成日時")
@@ -57,11 +57,11 @@ class CheckAnswerResponse(BaseModel):
         None, description="期待される実行結果"
     )
     error_type: str | None = Field(
-        None, description="エラータイプ（syntax/logic/none）"
+        None, description="エラータイプ(syntax/logic/none)"
     )
     error_message: str | None = Field(None, description="エラーメッセージ")
     hint: str | None = Field(None, description="ヒント")
-    execution_time: float = Field(..., description="実行時間（秒）")
+    execution_time: float = Field(..., description="実行時間(秒)")
 
 
 class TableSchemasResponse(BaseModel):

@@ -40,7 +40,7 @@ class Database:
                 message="データベース接続エラー",
                 error_code="DB_CONNECTION_ERROR",
                 detail=str(e),
-            )
+            ) from None
 
     async def disconnect(self) -> None:
         """データベース接続プールを閉じる"""
@@ -83,16 +83,16 @@ class Database:
                 message="SQL実行タイムアウト",
                 error_code="DB_TIMEOUT_ERROR",
                 detail=f"制限時間: {timeout}秒",
-            )
+            ) from None
         except asyncpg.PostgresSyntaxError as e:
             raise DatabaseError(
                 message="SQL構文エラー", error_code="DB_SYNTAX_ERROR", detail=str(e)
-            )
+            ) from None
         except Exception as e:
             logger.error(f"Database query error: {e}")
             raise DatabaseError(
                 message="SQL実行エラー", error_code="DB_EXECUTION_ERROR", detail=str(e)
-            )
+            ) from None
 
     async def execute(self, query: str, *args: Any) -> Any:
         """任意のSQLを実行（CREATE/DROP等）"""
@@ -104,7 +104,7 @@ class Database:
             logger.error(f"Database execute error: {e}")
             raise DatabaseError(
                 message="SQL実行エラー", error_code="DB_EXECUTION_ERROR", detail=str(e)
-            )
+            ) from None
 
     async def get_table_schemas(self) -> list[dict[str, Any]]:
         """現在のテーブルスキーマ情報を取得"""
@@ -170,7 +170,7 @@ class Database:
                 message="テーブル削除エラー",
                 error_code="DB_DROP_TABLE_ERROR",
                 detail=str(e),
-            )
+            ) from None
 
     async def check_health(self) -> bool:
         """データベース接続の健全性をチェック"""

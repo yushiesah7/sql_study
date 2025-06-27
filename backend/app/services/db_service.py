@@ -53,7 +53,7 @@ class DatabaseService:
                 message="システムスキーマの初期化に失敗しました",
                 error_code=DB_SCHEMA_ERROR,
                 detail=str(e),
-            )
+            ) from None
 
     async def drop_all_user_tables(self) -> None:
         """
@@ -88,7 +88,7 @@ class DatabaseService:
                 message="ユーザーテーブルの削除に失敗しました",
                 error_code=DB_EXECUTION_ERROR,
                 detail=str(e),
-            )
+            ) from None
 
     async def execute_sql_statements(self, sql_statements: list[str]) -> None:
         """
@@ -113,7 +113,7 @@ class DatabaseService:
                 message="SQL文の実行に失敗しました",
                 error_code=DB_EXECUTION_ERROR,
                 detail=str(e),
-            )
+            ) from None
 
     async def get_table_schemas(self) -> list[dict[str, Any]]:
         """
@@ -223,7 +223,7 @@ class DatabaseService:
                 message="テーブル構造の取得に失敗しました",
                 error_code=DB_SCHEMA_ERROR,
                 detail=str(e),
-            )
+            ) from None
 
     async def execute_select_query(
         self, sql: str, timeout: int = 5
@@ -254,7 +254,7 @@ class DatabaseService:
                 message="SELECT文の実行に失敗しました",
                 error_code=DB_EXECUTION_ERROR,
                 detail=str(e),
-            )
+            ) from None
 
     async def save_problem(
         self,
@@ -314,7 +314,7 @@ class DatabaseService:
                 message="問題の保存に失敗しました",
                 error_code=DB_EXECUTION_ERROR,
                 detail=str(e),
-            )
+            ) from None
 
     async def get_problem(self, problem_id: int) -> dict[str, Any] | None:
         """
@@ -348,4 +348,4 @@ class DatabaseService:
                 message="問題の取得に失敗しました",
                 error_code=DB_EXECUTION_ERROR,
                 detail=str(e),
-            )
+            ) from None

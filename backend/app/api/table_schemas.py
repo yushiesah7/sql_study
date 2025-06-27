@@ -104,7 +104,7 @@ async def get_table_schemas(
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except DatabaseError as e:
         logger.error(f"Database error during schema fetch: {e}")
@@ -115,7 +115,7 @@ async def get_table_schemas(
                 "message": e.message,
                 "detail": e.detail,
             },
-        )
+        ) from None
 
     except Exception as e:
         logger.error(f"Unexpected error during schema fetch: {e}")
@@ -126,4 +126,4 @@ async def get_table_schemas(
                 "message": "テーブル構造の取得に失敗しました",
                 "detail": str(e),
             },
-        )
+        ) from None
