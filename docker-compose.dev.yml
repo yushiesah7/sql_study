@@ -75,7 +75,7 @@ services:
       - "5432:5432"  # 開発時はDBに直接アクセス可能にする
 
   llm:
-    image: localai/localai:latest-aio-cpu
+    image: localai/localai:latest
     ports:
       - "8080:8080"
     volumes:
