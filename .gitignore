@@ -61,3 +61,6 @@ models/*.safetensors
 
 # Local scripts
 fix_*.py
+
+# LLM model files
+models/llm/*.gguf

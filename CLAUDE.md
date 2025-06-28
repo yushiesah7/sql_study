@@ -11,17 +11,35 @@ AIが生成したSQL実行結果を見て、ユーザーが同じ結果を得ら
 4. **採点とフィードバック**: AIが正誤判定と改善アドバイスを提供
 5. **次の問題へ**: 同じテーブルで新しい問題、または新しいテーマで最初から
 
-## 設計ドキュメント構成
+## ディレクトリ構成
 ```text
-docs/
-├── task_list.md            # 実装タスクリスト（実行順序付き）
-└── design/
-    ├── 01_data_model/      # データモデル設計書
-    ├── 02_database/        # データベース設計書
-    ├── 03_api/             # API設計書
-    ├── 04_llm/             # LLM連携設計書
-    ├── 05_frontend/        # フロントエンド設計書
-    └── templates/          # 各種設計書テンプレート
+sql_study/
+├── backend/
+│   ├── app/               # FastAPIアプリケーション
+│   ├── tests/             # テストコード
+│   ├── scripts/           # バックエンド専用スクリプト
+│   ├── requirements.txt
+│   ├── Dockerfile
+│   └── pyproject.toml
+├── frontend/
+│   ├── src/               # Next.jsソースコード
+│   ├── public/
+│   ├── package.json
+│   ├── Dockerfile
+│   └── next.config.js
+├── docs/
+│   ├── task_list.md       # 実装タスクリスト（実行順序付き）
+│   └── design/            # 設計書
+├── models/
+│   └── llm/               # LLMモデルファイル（*.gguf）
+├── scripts/               # 共通スクリプト
+├── logs/                  # ログファイル
+├── .env                   # 環境変数設定
+├── .gitignore
+├── docker-compose.yml     # 本番用Docker Compose設定
+├── docker-compose.dev.yml # 開発用Docker Compose設定
+├── CLAUDE.md             # プロジェクト固有指示
+└── README.md
 ```
 
 ## 実装時の重要事項
@@ -140,6 +158,18 @@ docker-compose -f docker-compose.dev.yml run --rm backend mypy /app
 
 # テスト実行
 docker-compose -f docker-compose.dev.yml run --rm backend pytest
+
+# スクリプト実行
+
+# バックエンド専用スクリプト（backend/scripts/内のファイル）
+# コンテナ内パス: /app/scripts/
+docker-compose -f docker-compose.dev.yml exec backend python /app/scripts/test_llm_manual.py
+docker-compose -f docker-compose.dev.yml exec backend python /app/scripts/test_create_tables_api.py
+
+# 共通スクリプト（scripts/内のファイル）  
+# コンテナ内パス: /scripts/
+docker-compose -f docker-compose.dev.yml exec backend python /scripts/common_utility.py
+docker-compose -f docker-compose.dev.yml exec frontend node /scripts/frontend_utility.js
 
 # フロントエンドLinter/Formatter
 cd frontend
