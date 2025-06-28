@@ -18,18 +18,28 @@ sql_study/
 │   ├── app/               # FastAPIアプリケーション
 │   ├── tests/             # テストコード
 │   ├── scripts/           # バックエンド専用スクリプト
-│   └── requirements.txt
+│   ├── requirements.txt
+│   ├── Dockerfile
+│   └── pyproject.toml
 ├── frontend/
 │   ├── src/               # Next.jsソースコード
-│   └── public/
+│   ├── public/
+│   ├── package.json
+│   ├── Dockerfile
+│   └── next.config.js
 ├── docs/
 │   ├── task_list.md       # 実装タスクリスト（実行順序付き）
 │   └── design/            # 設計書
 ├── models/
-│   └── llm/               # LLMモデルファイル
+│   └── llm/               # LLMモデルファイル（*.gguf）
 ├── scripts/               # 共通スクリプト
 ├── logs/                  # ログファイル
-└── docker-compose*.yml
+├── .env                   # 環境変数設定
+├── .gitignore
+├── docker-compose.yml     # 本番用Docker Compose設定
+├── docker-compose.dev.yml # 開発用Docker Compose設定
+├── CLAUDE.md             # プロジェクト固有指示
+└── README.md
 ```
 
 ## 実装時の重要事項
@@ -150,8 +160,16 @@ docker-compose -f docker-compose.dev.yml run --rm backend mypy /app
 docker-compose -f docker-compose.dev.yml run --rm backend pytest
 
 # スクリプト実行
-docker-compose -f docker-compose.dev.yml exec backend python /app/scripts/script_name.py
-docker-compose -f docker-compose.dev.yml exec backend python /scripts/script_name.py
+
+# バックエンド専用スクリプト（backend/scripts/内のファイル）
+# コンテナ内パス: /app/scripts/
+docker-compose -f docker-compose.dev.yml exec backend python /app/scripts/test_llm_manual.py
+docker-compose -f docker-compose.dev.yml exec backend python /app/scripts/test_create_tables_api.py
+
+# 共通スクリプト（scripts/内のファイル）  
+# コンテナ内パス: /scripts/
+docker-compose -f docker-compose.dev.yml exec backend python /scripts/common_utility.py
+docker-compose -f docker-compose.dev.yml exec frontend node /scripts/frontend_utility.js
 
 # フロントエンドLinter/Formatter
 cd frontend

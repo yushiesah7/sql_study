@@ -60,4 +60,7 @@ models/*.safetensors
 *.bak
 
 # Local scripts
-fix_*.pymodels/llm/*.gguf
+fix_*.py
+
+# LLM model files
+models/llm/*.gguf
