@@ -11,17 +11,25 @@ AIが生成したSQL実行結果を見て、ユーザーが同じ結果を得ら
 4. **採点とフィードバック**: AIが正誤判定と改善アドバイスを提供
 5. **次の問題へ**: 同じテーブルで新しい問題、または新しいテーマで最初から
 
-## 設計ドキュメント構成
+## ディレクトリ構成
 ```text
-docs/
-├── task_list.md            # 実装タスクリスト（実行順序付き）
-└── design/
-    ├── 01_data_model/      # データモデル設計書
-    ├── 02_database/        # データベース設計書
-    ├── 03_api/             # API設計書
-    ├── 04_llm/             # LLM連携設計書
-    ├── 05_frontend/        # フロントエンド設計書
-    └── templates/          # 各種設計書テンプレート
+sql_study/
+├── backend/
+│   ├── app/               # FastAPIアプリケーション
+│   ├── tests/             # テストコード
+│   ├── scripts/           # バックエンド専用スクリプト
+│   └── requirements.txt
+├── frontend/
+│   ├── src/               # Next.jsソースコード
+│   └── public/
+├── docs/
+│   ├── task_list.md       # 実装タスクリスト（実行順序付き）
+│   └── design/            # 設計書
+├── models/
+│   └── llm/               # LLMモデルファイル
+├── scripts/               # 共通スクリプト
+├── logs/                  # ログファイル
+└── docker-compose*.yml
 ```
 
 ## 実装時の重要事項
@@ -140,6 +148,10 @@ docker-compose -f docker-compose.dev.yml run --rm backend mypy /app
 
 # テスト実行
 docker-compose -f docker-compose.dev.yml run --rm backend pytest
+
+# スクリプト実行
+docker-compose -f docker-compose.dev.yml exec backend python /app/scripts/script_name.py
+docker-compose -f docker-compose.dev.yml exec backend python /scripts/script_name.py
 
 # フロントエンドLinter/Formatter
 cd frontend
