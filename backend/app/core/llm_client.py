@@ -63,7 +63,9 @@ class LocalAIClient:
         # リトライ機能付きで実行
         for attempt in range(self.max_retries):
             try:
-                async with httpx.AsyncClient(timeout=httpx.Timeout(self.timeout, read=self.timeout)) as client:
+                async with httpx.AsyncClient(
+                    timeout=httpx.Timeout(self.timeout, read=self.timeout)
+                ) as client:
                     response = await client.post(
                         f"{self.base_url}/chat/completions",
                         json=payload,
@@ -184,8 +186,10 @@ class LocalAIClient:
         """
         try:
             test_messages = [{"role": "user", "content": "Hello"}]
-            
-            logger.debug(f"LLM health check - URL: {self.base_url}, Model: {self.model_name}")
+
+            logger.debug(
+                f"LLM health check - URL: {self.base_url}, Model: {self.model_name}"
+            )
 
             async with httpx.AsyncClient(timeout=15.0) as client:
                 response = await client.post(
@@ -197,20 +201,26 @@ class LocalAIClient:
                     },
                     headers={"Content-Type": "application/json"},
                 )
-                
-                logger.info(f"LLM health check response - Status: {response.status_code}, "
-                           f"Headers: {dict(response.headers)}")
-                
+
+                logger.info(
+                    f"LLM health check response - Status: {response.status_code}, "
+                    f"Headers: {dict(response.headers)}"
+                )
+
                 if response.status_code != 200:
-                    logger.warning(f"LLM health check failed - Status: {response.status_code}, "
-                                 f"Body: {response.text[:500]}")
+                    logger.warning(
+                        f"LLM health check failed - Status: {response.status_code}, "
+                        f"Body: {response.text[:500]}"
+                    )
                 else:
                     logger.info("LLM health check successful")
-                
+
                 return response.status_code == 200
 
         except Exception as e:
-            logger.error(f"LLM health check failed with exception: {type(e).__name__}: {e}")
+            logger.error(
+                f"LLM health check failed with exception: {type(e).__name__}: {e}"
+            )
             return False
 
 
