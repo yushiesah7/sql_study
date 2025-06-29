@@ -51,21 +51,13 @@ test-v: ## テストを詳細実行
 	docker-compose exec backend pytest -v
 
 lint: ## Ruffでコードをチェック
-	@if [ -f docker-compose.dev.yml ] && docker-compose -f docker-compose.dev.yml ps backend | grep -q Up; then \
-		cd backend && ruff check app/; \
-	else \
-		docker-compose exec backend ruff check /app; \
-	fi
+	docker-compose -f docker-compose.dev.yml exec backend ruff check /app
 
 format: ## Ruffでコードをフォーマット
-	@if [ -f docker-compose.dev.yml ] && docker-compose -f docker-compose.dev.yml ps backend | grep -q Up; then \
-		cd backend && ruff format app/; \
-	else \
-		docker-compose exec backend ruff format /app; \
-	fi
+	docker-compose -f docker-compose.dev.yml exec backend ruff format /app
 
 mypy: ## 型チェックを実行
-	docker-compose exec backend mypy app/
+	docker-compose -f docker-compose.dev.yml exec backend mypy /app
 
 # フロントエンド開発
 frontend-shell: ## フロントエンドコンテナに入る

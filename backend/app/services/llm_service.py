@@ -52,7 +52,7 @@ class LLMService:
             self._validate_table_generation_result(result)
 
             # デバッグ: 生成されたSQL文をログ出力
-            sql_statements = result.get('sql_statements', [])
+            sql_statements = result.get("sql_statements", [])
             logger.info(f"Generated SQL statements: {sql_statements}")
 
             logger.info(f"Generated tables for theme: {result.get('theme', 'Unknown')}")

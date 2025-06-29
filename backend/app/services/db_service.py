@@ -346,10 +346,10 @@ class DatabaseService:
 
             problem = results[0]
             # Parse JSON fields back to Python objects
-            if isinstance(problem['expected_result'], str):
-                problem['expected_result'] = json.loads(problem['expected_result'])
-            if isinstance(problem['table_schemas'], str):
-                problem['table_schemas'] = json.loads(problem['table_schemas'])
+            if isinstance(problem["expected_result"], str):
+                problem["expected_result"] = json.loads(problem["expected_result"])
+            if isinstance(problem["table_schemas"], str):
+                problem["table_schemas"] = json.loads(problem["table_schemas"])
 
             return problem
 

@@ -117,22 +117,20 @@ docker-compose up -d backend
 
 #### 3. Linting/Formatting
 
-**開発環境（推奨）**:
+**統一コマンド（推奨）**:
 ```bash
-# ホストでRuffを実行（ファイルが同期されているため）
-cd backend
-ruff check app/
-ruff format app/
+# Makefileコマンド（開発環境で統一されたlint/format）
+make lint     # Ruffでコードをチェック
+make format   # Ruffでコードをフォーマット 
+make mypy     # 型チェックを実行
 ```
 
-**本番環境の場合**:
+**直接実行の場合**:
 ```bash
-# コンテナ内で実行
-docker-compose exec backend ruff check /app
-docker-compose exec backend ruff format /app
-
-# 修正後のファイルをホストにコピー（手動）
-docker cp sql_study-backend-1:/app/app ./backend/
+# コンテナ内で実行（開発環境・本番環境共通）
+docker-compose -f docker-compose.dev.yml exec backend ruff check /app
+docker-compose -f docker-compose.dev.yml exec backend ruff format /app
+docker-compose -f docker-compose.dev.yml exec backend mypy /app
 ```
 
 #### 4. テスト実行

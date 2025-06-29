@@ -17,8 +17,7 @@ from app.services.prompt_generator import PromptGenerator
 
 # ロギング設定
 logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -65,21 +64,22 @@ async def test_table_creation() -> None:
             logger.info("=== End of JSON ===")
 
             import json
+
             parsed = json.loads(json_text)
             logger.info("✅ JSON parsing successful!")
             logger.info(f"Theme: {parsed.get('theme')}")
-            sql_count = len(parsed.get('sql_statements', []))
+            sql_count = len(parsed.get("sql_statements", []))
             logger.info(f"Number of SQL statements: {sql_count}")
 
         except json.JSONDecodeError as e:
             logger.error(f"❌ JSON parsing failed: {e}")
             logger.error(f"Error position: line {e.lineno}, column {e.colno}")
             # エラー位置の前後を表示
-            lines = json_text.split('\n')
+            lines = json_text.split("\n")
             if e.lineno <= len(lines):
-                logger.error(f"Error line: {lines[e.lineno-1]}")
+                logger.error(f"Error line: {lines[e.lineno - 1]}")
                 if e.lineno > 1:
-                    logger.error(f"Previous line: {lines[e.lineno-2]}")
+                    logger.error(f"Previous line: {lines[e.lineno - 2]}")
                 if e.lineno < len(lines):
                     logger.error(f"Next line: {lines[e.lineno]}")
 
