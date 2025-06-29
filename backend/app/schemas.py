@@ -3,7 +3,7 @@ Pydantic入出力モデル定義
 """
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -39,7 +39,9 @@ class GenerateProblemResponse(BaseModel):
     """問題生成レスポンス"""
 
     problem_id: int = Field(..., description="問題ID")
-    difficulty: str = Field(..., description="難易度(easy/medium/hard)")
+    difficulty: Literal["easy", "medium", "hard"] = Field(
+        ..., description="難易度(easy/medium/hard)"
+    )
     expected_result: list[dict[str, Any]] = Field(..., description="期待される実行結果")
     hint: str | None = Field(None, description="ヒント")
     created_at: datetime = Field(..., description="作成日時")
@@ -56,7 +58,9 @@ class CheckAnswerResponse(BaseModel):
     expected_result: list[dict[str, Any]] | None = Field(
         None, description="期待される実行結果"
     )
-    error_type: str | None = Field(None, description="エラータイプ(syntax/logic/none)")
+    error_type: Literal["syntax", "logic", "none"] | None = Field(
+        None, description="エラータイプ(syntax/logic/none)"
+    )
     error_message: str | None = Field(None, description="エラーメッセージ")
     hint: str | None = Field(None, description="ヒント")
     execution_time: float = Field(..., description="実行時間(秒)")
@@ -72,7 +76,9 @@ class TableSchemasResponse(BaseModel):
 class HealthResponse(BaseModel):
     """ヘルスチェックレスポンス"""
 
-    status: str = Field(..., description="サービスステータス")
+    status: Literal["healthy", "degraded", "unhealthy"] = Field(
+        ..., description="サービスステータス"
+    )
     timestamp: datetime = Field(..., description="レスポンス時刻")
     version: str = Field(..., description="APIバージョン")
     services: dict[str, bool] = Field(..., description="依存サービスの状態")

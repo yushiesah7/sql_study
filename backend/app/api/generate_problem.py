@@ -4,6 +4,7 @@
 """
 
 import logging
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -83,9 +84,13 @@ async def generate_problem(
             # TODO: 再生成ロジックの実装
 
         # 4. 問題をデータベースに保存
+        # 難易度のデフォルト値を型安全に設定
+        default_difficulty: Literal["easy", "medium", "hard"] = "medium"
+        difficulty = problem_info.get("difficulty", default_difficulty)
+
         problem_id = await db_service.save_problem(
             theme="未設定",  # TODO: セッション管理から取得
-            difficulty=problem_info.get("difficulty", "medium"),
+            difficulty=difficulty,
             correct_sql=correct_sql,
             expected_result=expected_result,
             table_schemas=table_schemas,
