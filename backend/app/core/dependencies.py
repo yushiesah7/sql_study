@@ -2,6 +2,8 @@
 依存性注入の設定
 """
 
+from functools import lru_cache
+
 from app.core.db import Database, db
 from app.core.llm_client import LLMClient
 from app.services.db_service import DatabaseService
@@ -13,10 +15,15 @@ async def get_db() -> Database:
     return db
 
 
+@lru_cache(maxsize=1)
+def _get_llm_client() -> LLMClient:
+    """LLMクライアントのシングルトンインスタンスを取得"""
+    return LLMClient()
+
+
 async def get_llm() -> LLMService:
     """LLMサービスを取得"""
-    llm_client = LLMClient()
-    return LLMService(llm_client)
+    return LLMService(_get_llm_client())
 
 
 async def get_db_service() -> DatabaseService:
