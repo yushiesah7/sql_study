@@ -2,7 +2,7 @@ import React from 'react';
 import { clsx } from 'clsx';
 
 interface TableDisplayProps {
-  data: Record<string, any>[];
+  data: Record<string, unknown>[];
   title?: string;
   className?: string;
   maxRows?: number;

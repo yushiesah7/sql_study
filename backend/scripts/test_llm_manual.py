@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import asyncio
-import httpx
 import json
 
+import httpx
 
-async def test_llm():
+
+async def test_llm() -> None:
     """最小限のLLMテスト"""
     url = "http://llm:8080/chat/completions"
     payload = {

@@ -9,7 +9,7 @@ from typing import Any
 
 from app.core.error_codes import LLM_GENERATION_FAILED, LLM_INVALID_RESPONSE
 from app.core.exceptions import LLMError
-from app.core.llm_client import LocalAIClient
+from app.core.llm_client import LLMClient
 from app.services.prompt_generator import PromptGenerator
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class LLMService:
     """LLM統合サービスクラス"""
 
-    def __init__(self, llm_client: LocalAIClient):
+    def __init__(self, llm_client: LLMClient):
         self.llm_client = llm_client
         self.prompt_generator = PromptGenerator()
 
@@ -50,6 +50,10 @@ class LLMService:
 
             # 結果検証
             self._validate_table_generation_result(result)
+
+            # デバッグ: 生成されたSQL文をログ出力
+            sql_statements = result.get("sql_statements", [])
+            logger.info(f"Generated SQL statements: {sql_statements}")
 
             logger.info(f"Generated tables for theme: {result.get('theme', 'Unknown')}")
             return result

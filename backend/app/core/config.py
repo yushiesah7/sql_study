@@ -21,7 +21,8 @@ class Settings(BaseSettings):
     DB_MAX_OVERFLOW: int = Field(default=20)
     DB_POOL_TIMEOUT: float = Field(default=30.0)
 
-    # LocalAI
+    # LocalAI / Ollama
+    LLM_ENDPOINT_TYPE: str = Field(default="localai")  # "localai" or "ollama"
     LLM_API_URL: str = Field(default="http://llm:8080/v1")
     LLM_MODEL_NAME: str = Field(default="gpt-3.5-turbo")
     LLM_TIMEOUT: float = Field(default=30.0)

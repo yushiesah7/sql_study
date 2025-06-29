@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 import asyncio
-import httpx
 import json
 
+import httpx
 
-async def test_create_tables():
-    """テーブル作成APIのテスト（軽量版）"""
+
+async def test_create_tables() -> None:
+    """テーブル作成APIのテスト(軽量版)"""
     url = "http://llm:8080/chat/completions"
 
     # まず直接LLMをテストして応答速度を確認
@@ -47,7 +48,7 @@ async def test_create_tables():
     except Exception as e:
         print(f"例外: {type(e).__name__}: {e}")
 
-    print("\n=== APIテスト（軽量版） ===")
+    print("\n=== APIテスト(軽量版) ===")
     # APIテスト - max_tokensを小さくして軽量なレスポンスを要求
     api_url = "http://backend:8000/api/create-tables"
     api_payload = {

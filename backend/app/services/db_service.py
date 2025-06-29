@@ -2,6 +2,7 @@
 データベース操作サービス
 """
 
+import json
 import logging
 from typing import Any
 
@@ -293,8 +294,8 @@ class DatabaseService:
                 theme,
                 difficulty,
                 correct_sql,
-                expected_result,
-                table_schemas,
+                json.dumps(expected_result, ensure_ascii=False),
+                json.dumps(table_schemas, ensure_ascii=False),
                 hint,
             )
 
@@ -340,7 +341,17 @@ class DatabaseService:
                 problem_id,
             )
 
-            return results[0] if results else None
+            if not results:
+                return None
+
+            problem = results[0]
+            # Parse JSON fields back to Python objects
+            if isinstance(problem["expected_result"], str):
+                problem["expected_result"] = json.loads(problem["expected_result"])
+            if isinstance(problem["table_schemas"], str):
+                problem["table_schemas"] = json.loads(problem["table_schemas"])
+
+            return problem
 
         except Exception as e:
             logger.error(f"Failed to get problem {problem_id}: {e}")
