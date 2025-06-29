@@ -21,6 +21,9 @@ package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
+# Generated TypeScript files
+next-env.d.ts
+
 # IDE files
 .vscode/
 .idea/
