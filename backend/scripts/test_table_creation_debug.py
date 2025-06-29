@@ -12,7 +12,6 @@ from pathlib import Path
 # プロジェクトルートをPythonパスに追加
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.core.config import settings
 from app.core.llm_client import LLMClient
 from app.services.prompt_generator import PromptGenerator
 
@@ -24,7 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-async def test_table_creation():
+async def test_table_creation() -> None:
     """テーブル作成の詳細テスト"""
     try:
         # LLMクライアント初期化
@@ -49,7 +48,7 @@ async def test_table_creation():
         try:
             # JSONブロックを探して抽出
             content_stripped = content.strip()
-            
+
             if "```json" in content_stripped:
                 json_tag = "```json"
                 start = content_stripped.find(json_tag) + len(json_tag)
@@ -69,7 +68,8 @@ async def test_table_creation():
             parsed = json.loads(json_text)
             logger.info("✅ JSON parsing successful!")
             logger.info(f"Theme: {parsed.get('theme')}")
-            logger.info(f"Number of SQL statements: {len(parsed.get('sql_statements', []))}")
+            sql_count = len(parsed.get('sql_statements', []))
+            logger.info(f"Number of SQL statements: {sql_count}")
 
         except json.JSONDecodeError as e:
             logger.error(f"❌ JSON parsing failed: {e}")

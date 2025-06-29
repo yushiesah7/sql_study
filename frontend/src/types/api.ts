@@ -1,17 +1,25 @@
+// Define more specific context types
+export interface CheckAnswerContext {
+  problem_id: number;
+  user_sql: string;
+}
+
+export type UniversalContext = CheckAnswerContext | Record<string, unknown>;
+
 export interface UniversalRequest {
   prompt?: string;
-  context?: Record<string, any>;
+  context?: UniversalContext;
 }
 
 export interface UniversalResponse {
   success: boolean;
   message: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 export interface CreateTablesRequest {
   prompt?: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 export interface CreateTablesResponse {
@@ -19,18 +27,18 @@ export interface CreateTablesResponse {
   theme: string;
   message?: string;
   tables?: string[];
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 export interface GenerateProblemRequest {
   prompt?: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 export interface GenerateProblemResponse {
   problem_id: number;
   difficulty: 'easy' | 'medium' | 'hard';
-  expected_result: Record<string, any>[];
+  expected_result: Record<string, unknown>[];
   hint?: string;
   created_at: string;
 }
@@ -43,8 +51,8 @@ export interface CheckAnswerRequest {
 export interface CheckAnswerResponse {
   is_correct: boolean;
   message: string;
-  user_result?: Record<string, any>[];
-  expected_result?: Record<string, any>[];
+  user_result?: Record<string, unknown>[];
+  expected_result?: Record<string, unknown>[];
   error_type?: 'syntax' | 'logic' | 'none';
   error_message?: string;
   hint?: string;
@@ -59,7 +67,7 @@ export interface TableSchemasResponse {
 export interface TableSchema {
   table_name: string;
   columns: ColumnInfo[];
-  sample_data?: Record<string, any>[];
+  sample_data?: Record<string, unknown>[];
 }
 
 export interface ColumnInfo {

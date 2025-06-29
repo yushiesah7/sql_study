@@ -350,7 +350,7 @@ class DatabaseService:
                 problem['expected_result'] = json.loads(problem['expected_result'])
             if isinstance(problem['table_schemas'], str):
                 problem['table_schemas'] = json.loads(problem['table_schemas'])
-            
+
             return problem
 
         except Exception as e:
