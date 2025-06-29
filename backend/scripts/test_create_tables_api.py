@@ -68,8 +68,11 @@ async def test_create_tables() -> None:
 
             if response.status_code == 200:
                 result = response.json()
-                print(f"テーマ: {result.get('theme', 'Unknown')}")
-                print(f"SQL文の数: {len(result.get('sql_statements', []))}")
+                data = result.get('data', {})
+                print(f"成功: {result.get('success', False)}")
+                print(f"メッセージ: {result.get('message', '')}")
+                print(f"テーマ: {data.get('theme', 'Unknown')}")
+                print(f"テーブル数: {data.get('table_count', 0)}")
             else:
                 print(f"エラー: {response.text}")
 

@@ -4,6 +4,7 @@
 
 import json
 import logging
+from datetime import date, datetime
 from typing import Any
 
 from app.core.db import Database
@@ -11,6 +12,15 @@ from app.core.error_codes import DB_EXECUTION_ERROR, DB_SCHEMA_ERROR
 from app.core.exceptions import DatabaseError
 
 logger = logging.getLogger(__name__)
+
+
+class DateJSONEncoder(json.JSONEncoder):
+    """日付型データをJSON変換可能にするカスタムエンコーダー"""
+
+    def default(self, obj: Any) -> Any:
+        if isinstance(obj, (date, datetime)):
+            return obj.isoformat()
+        return super().default(obj)
 
 
 class DatabaseService:
@@ -203,9 +213,9 @@ class DatabaseService:
                 formatted_columns = []
                 for col in columns:
                     column_info = {
-                        "name": col["column_name"],
-                        "type": col["data_type"].upper(),
-                        "nullable": col["is_nullable"] == "YES",
+                        "column_name": col["column_name"],
+                        "data_type": col["data_type"].upper(),
+                        "is_nullable": col["is_nullable"] == "YES",
                         "is_primary_key": col["column_name"] in pk_columns,
                     }
 
@@ -294,8 +304,8 @@ class DatabaseService:
                 theme,
                 difficulty,
                 correct_sql,
-                json.dumps(expected_result, ensure_ascii=False),
-                json.dumps(table_schemas, ensure_ascii=False),
+                json.dumps(expected_result, ensure_ascii=False, cls=DateJSONEncoder),
+                json.dumps(table_schemas, ensure_ascii=False, cls=DateJSONEncoder),
                 hint,
             )
 

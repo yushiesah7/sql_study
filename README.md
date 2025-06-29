@@ -19,6 +19,79 @@ AIを活用した新しいタイプのSQL学習アプリケーションです。
 - **AI/LLM**: LocalAI（OpenAI API互換）
 - **インフラ**: Docker Compose
 
+## システムアーキテクチャ
+
+### 全体構成
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │    Backend      │    │   Database      │
+│   (Next.js)     │◄──►│   (FastAPI)     │◄──►│ (PostgreSQL)    │
+│   Port: 3000    │    │   Port: 8001    │    │   Port: 5432    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │      LLM        │
+                       │   (LocalAI)     │
+                       │   Port: 11434   │
+                       └─────────────────┘
+```
+
+### コンポーネントの責務
+
+#### フロントエンド (Next.js)
+- ユーザーインターフェース
+- APIクライアント
+- リアルタイムフィードバック表示
+
+#### バックエンド (FastAPI)
+- **API層**: RESTful API エンドポイント
+- **サービス層**: ビジネスロジック
+  - `LLMService`: AI機能の統合
+  - `DatabaseService`: データベース操作
+  - `PromptGenerator`: AI用プロンプト生成
+- **データアクセス層**: PostgreSQL接続管理
+
+#### データベース (PostgreSQL)
+- **publicスキーマ**: 学習用テーブル（動的生成）
+- **app_systemスキーマ**: システム管理用テーブル
+  - `problems`: 生成された問題の保存
+
+#### LLM (LocalAI)
+- テーブル構造とデータの自動生成
+- SQL学習問題の作成
+- 回答の採点とフィードバック
+
+### 起動順序と依存関係
+
+1. **PostgreSQL**: データベースサーバー起動
+2. **LocalAI**: LLMサーバー起動（モデルロード含む）
+3. **Backend**: データベース接続確認後にAPI起動
+4. **Frontend**: バックエンドAPI接続確認後に起動
+
+### データフロー
+
+#### テーブル作成フロー
+```
+User → Frontend → Backend → LLM → Backend → Database
+                     ↓
+               SQL生成・実行
+```
+
+#### 問題生成フロー
+```
+User → Frontend → Backend → Database(schema) → LLM → Backend → Database(save)
+                     ↓
+               問題とSQL生成
+```
+
+#### 回答チェックフロー
+```
+User → Frontend → Backend → Database(execute) → LLM → Backend → Frontend
+                     ↓
+               SQL実行・採点
+```
+
 ## 必要な環境
 
 - Docker Desktop
