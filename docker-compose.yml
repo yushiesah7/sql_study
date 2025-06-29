@@ -1,3 +1,9 @@
+# 本番環境用Docker Compose設定
+# 開発環境との主な違い:
+# - llmサービスが含まれている（LocalAIを使用）
+# - ボリュームマウントなし（イメージビルド方式）
+# - 環境変数でLLM_ENDPOINT_TYPE=localaiを設定する
+
 services:
   backend:
     build: ./backend

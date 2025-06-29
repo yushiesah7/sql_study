@@ -11,8 +11,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      llm:
-        condition: service_started
     networks:
       - app-network
     restart: unless-stopped
@@ -77,16 +75,8 @@ services:
     ports:
       - "5432:5432"  # 開発時はDBに直接アクセス可能にする
 
-  llm:
-    image: localai/localai:latest
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./models:/models
-    command: ["--models-path", "/models", "--debug"]
-    networks:
-      - app-network
-    restart: unless-stopped
+  # llmサービスは開発環境ではOllama (Mac Native)を使用するため削除
+  # 本番環境ではdocker-compose.ymlでLocalAIを使用
 
 networks:
   app-network:

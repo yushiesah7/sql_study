@@ -3,7 +3,7 @@
 """
 
 from app.core.db import Database, db
-from app.core.llm_client import LocalAIClient
+from app.core.llm_client import LLMClient
 from app.services.db_service import DatabaseService
 from app.services.llm_service import LLMService
 
@@ -15,7 +15,7 @@ async def get_db() -> Database:
 
 async def get_llm() -> LLMService:
     """LLMサービスを取得"""
-    llm_client = LocalAIClient()
+    llm_client = LLMClient()
     return LLMService(llm_client)
 
 

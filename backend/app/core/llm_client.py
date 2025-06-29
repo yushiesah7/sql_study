@@ -1,6 +1,6 @@
 """
-LocalAIクライアント実装
-OpenAI API互換のHTTPクライアント
+LLMクライアント実装
+LocalAI/Ollama対応のOpenAI API互換HTTPクライアント
 """
 
 import asyncio
@@ -21,10 +21,11 @@ from app.core.exceptions import LLMError
 logger = logging.getLogger(__name__)
 
 
-class LocalAIClient:
-    """LocalAI HTTPクライアント"""
+class LLMClient:
+    """LLM HTTPクライアント (LocalAI/Ollama対応)"""
 
     def __init__(self) -> None:
+        self.endpoint_type = settings.LLM_ENDPOINT_TYPE
         self.base_url = settings.LLM_API_URL
         self.model_name = settings.LLM_MODEL_NAME
         self.timeout = settings.LLM_TIMEOUT
@@ -102,7 +103,7 @@ class LocalAIClient:
                     raise LLMError(
                         message="LLM接続エラー",
                         error_code=LLM_CONNECTION,
-                        detail="LocalAIサービスに接続できません",
+                        detail=f"{self.endpoint_type.upper()}サービスに接続できません",
                     ) from None
 
             except Exception as e:
@@ -225,4 +226,4 @@ class LocalAIClient:
 
 
 # グローバルクライアントインスタンス
-llm_client = LocalAIClient()
+llm_client = LLMClient()
