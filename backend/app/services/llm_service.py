@@ -51,9 +51,20 @@ class LLMService:
             # 結果検証
             self._validate_table_generation_result(result)
 
-            # デバッグ: 生成されたSQL文をログ出力
+            # SQL文の後処理（末尾のカンマを削除）
             sql_statements = result.get("sql_statements", [])
-            logger.info(f"Generated SQL statements: {sql_statements}")
+            cleaned_statements = []
+            for sql in sql_statements:
+                # 末尾の余分なカンマを削除
+                sql = sql.strip()
+                if sql.endswith(","):
+                    sql = sql[:-1]
+                cleaned_statements.append(sql)
+            
+            result["sql_statements"] = cleaned_statements
+
+            # デバッグ: 生成されたSQL文をログ出力
+            logger.info(f"Generated SQL statements: {cleaned_statements}")
 
             logger.info(f"Generated tables for theme: {result.get('theme', 'Unknown')}")
             return result

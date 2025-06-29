@@ -60,6 +60,8 @@ JSONのみを出力してください。説明や補足は不要です。
   存在しないテーブルへの参照は厳禁
 - **重要**: 各SQL文は配列の1要素として完結させること。
   複数行のINSERT文は1つの文字列にまとめる
+- **重要**: 各SQL文は完全な文として終了すること。
+  末尾にカンマやセミコロンは不要（次の文との区切りは配列要素で表現）
 
 **正しい実行順序の例**:
 
@@ -68,23 +70,20 @@ JSONのみを出力してください。説明や補足は不要です。
   "theme": "社員管理",
   "description": "部署と社員を管理するシステム",
   "sql_statements": [
-    "CREATE TABLE departments (id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, "
-    "location VARCHAR(100))",
-    "CREATE TABLE employees (id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, "
-    "department_id INTEGER REFERENCES departments(id), salary INTEGER, hire_date DATE)",
-    "INSERT INTO departments (name, location) VALUES ('営業部', '東京'), "
-    "('開発部', '大阪'), ('人事部', '名古屋')",
-    "INSERT INTO employees (name, department_id, salary, hire_date) VALUES "
-    "('田中太郎', 1, 450000, '2020-04-01'), ('佐藤花子', 2, 520000, '2019-03-15'), "
-    "('山田次郎', 1, 380000, '2021-06-10')"
+    "CREATE TABLE departments (id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, location VARCHAR(100))",
+    "CREATE TABLE employees (id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, department_id INTEGER REFERENCES departments(id), salary INTEGER, hire_date DATE)",
+    "INSERT INTO departments (name, location) VALUES ('営業部', '東京'), ('開発部', '大阪'), ('人事部', '名古屋')",
+    "INSERT INTO employees (name, department_id, salary, hire_date) VALUES ('田中太郎', 1, 450000, '2020-04-01'), ('佐藤花子', 2, 520000, '2019-03-15'), ('山田次郎', 1, 380000, '2021-06-10')"
   ]
 }
 ```
 
-**複数行INSERT文の正しい書き方**:
-- 正しい: `"INSERT INTO books (title, author) VALUES ('本1', '著者1'), "
-  "('本2', '著者2'), ('本3', '著者3')"`
-- 間違い: 複数の配列要素に分割
+**複数データのINSERT文の正しい書き方**:
+- 正しい（1つのINSERT文にまとめる）: 
+  `"INSERT INTO books (title, author) VALUES ('本1', '著者1'), ('本2', '著者2'), ('本3', '著者3')"`
+- 間違い（複数のINSERT文に分割）:
+  `["INSERT INTO books (title, author) VALUES ('本1', '著者1')", "INSERT INTO books (title, author) VALUES ('本2', '著者2')"]`
+- 間違い（不完全な文）:
   `["INSERT INTO books VALUES ('本1', '著者1'),", "('本2', '著者2')"]`
 
 このように、必ず親テーブル(departments)を先に作成・データ挿入してから、子テーブル(employees)を処理してください。
@@ -265,11 +264,15 @@ JSONのみを出力してください。説明や補足は不要です。
             for col in columns:
                 col_name = col.get("column_name", "unknown")
                 data_type = col.get("data_type", "unknown")
-                is_nullable = col.get("is_nullable", "YES")
-                # RDBMSによる大文字小文字やスペースの違いに対応
-                nullable_str = (
-                    "NULL" if is_nullable.upper().strip() == "YES" else "NOT NULL"
-                )
+                is_nullable = col.get("is_nullable", True)
+                # boolean型とstring型の両方に対応
+                if isinstance(is_nullable, bool):
+                    nullable_str = "NULL" if is_nullable else "NOT NULL"
+                else:
+                    # 文字列の場合（後方互換性のため）
+                    nullable_str = (
+                        "NULL" if str(is_nullable).upper().strip() == "YES" else "NOT NULL"
+                    )
                 column_info.append(f"  - {col_name}: {data_type} {nullable_str}")
 
             table_info = f"テーブル: {table_name}\n" + "\n".join(column_info)
